@@ -16,7 +16,7 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(usecwd=True))
 
 _client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY", ""))
-_DEFAULT_MODEL = "gemini-2.0-flash-lite"
+_DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
 
 
 def generate(prompt: str) -> str:
