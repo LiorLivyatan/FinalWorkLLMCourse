@@ -1,214 +1,143 @@
+# Area: Student Callbacks
+# PRD: docs/superpowers/specs/2026-03-20-student-referee-ai-design.md
 """
-my_ai.py — YOUR AI IMPLEMENTATION
-===================================
+MyRefereeAI — Q21G League Referee Implementation.
 
-This is the ONLY file you need to edit.
+Uses Gemini (via gemini_client) for LLM inference and
+Agno RAG (via knowledge_base) for accurate question answering.
 
-Implement the 4 methods below. Each method receives a context dict with:
-- ctx["dynamic"]: Data from incoming messages (game_id, player info, etc.)
-- ctx["service"]: Info about what LLM service to call
-
-The package handles everything else: email polling, protocol messages,
-game state tracking, validation, etc.
-
-You can use any libraries you want (OpenAI, Anthropic, HuggingFace, etc.)
-to implement your AI logic.
+Book: Section 4.3 of MCP Architecture book
+Strategy: Miller's Law (7 items) -> association word "seven"
 """
+import difflib
+from typing import Any, Dict
 
 from q21_referee import RefereeAI
+import gemini_client
+import knowledge_base
+from book_config import (
+    BOOK_NAME, BOOK_HINT, ASSOCIATION_WORD,
+    ACTUAL_ASSOCIATION_WORD, OPENING_SENTENCE,
+)
 
 
 class MyRefereeAI(RefereeAI):
+    """Referee AI using Gemini + Agno RAG. Paragraph: MCP book section 4.3."""
 
-    def get_warmup_question(self, ctx):
-        """
-        Called when a new round starts.
-        Return a simple question to verify player connectivity.
+    def __init__(self) -> None:
+        self._opening_sentence = OPENING_SENTENCE
+        self._actual_word = ACTUAL_ASSOCIATION_WORD
 
-        ctx["dynamic"] contains:
-            season_id, round_number, round_id, game_id, match_id,
-            referee_id, player_a_id, player_a_email, player_b_id, player_b_email
+    def get_warmup_question(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
+        _dynamic = ctx.get("dynamic", ctx)
+        return {"warmup_question":
+                "How many items can the average human hold in short-term memory?"}
 
-        ctx["service"] contains:
-            name, description, required_output_fields, deadline_seconds
-        """
-        # ─── YOUR AI LOGIC HERE ───
-        # Example: hardcoded question
-        return {
-            "warmup_question": "What is the capital of Israel?"
-        }
+    def get_round_start_info(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
+        _dynamic = ctx.get("dynamic", ctx)
+        return {"book_name": BOOK_NAME, "book_hint": BOOK_HINT,
+                "association_word": ASSOCIATION_WORD}
 
-        # ─── OR: use an LLM ───
-        # response = openai.chat.completions.create(
-        #     model="gpt-4",
-        #     messages=[{"role": "user",
-        #                "content": "Generate a simple trivia question"}]
-        # )
-        # return {"warmup_question": response.choices[0].message.content}
-
-    def get_round_start_info(self, ctx):
-        """
-        Called after BOTH players responded to warmup.
-        Choose a book, write a hint, and pick an association word.
-
-        ctx["dynamic"] contains:
-            season_id, round_number, round_id, game_id, match_id, referee_id,
-            player_a: {id, email, warmup_answer},
-            player_b: {id, email, warmup_answer}
-
-        ctx["service"] contains:
-            name, description, required_output_fields, deadline_seconds
-        """
-        # ─── YOUR AI LOGIC HERE ───
-        return {
-            "book_name": "The Great Gatsby",
-            "book_hint": "A novel about the American Dream in the 1920s Jazz Age",
-            "association_word": "color"
-        }
-
-        # ─── OR: pick from a curated list, use an LLM to generate hints ───
-
-    def get_answers(self, ctx):
-        """
-        Called when a player submits their 20 questions.
-        Answer each with A, B, C, D, or "Not Relevant".
-
-        ctx["dynamic"] contains:
-            season_id, round_number, round_id, game_id, match_id, referee_id,
-            player_id, player_email,
-            book_name, book_hint, association_word,
-            questions (list of {question_number, question_text, options})
-
-        ctx["service"] contains:
-            name, description, required_output_fields, deadline_seconds
-        """
-        dynamic = ctx["dynamic"]
-        questions = dynamic["questions"]
-
-        # ─── YOUR AI LOGIC HERE ───
+    def get_answers(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
+        dynamic = ctx.get("dynamic", ctx)
+        questions = dynamic.get("questions", [])
         answers = []
         for q in questions:
-            # Example: simple logic — always answer "B"
-            answers.append({
-                "question_number": q["question_number"],
-                "answer": "B"
-            })
-
-            # ─── OR: use an LLM to actually answer ───
-            # prompt = f"""
-            # Book: {dynamic['book_name']}
-            # Hint: {dynamic['book_hint']}
-            # Question: {q['question_text']}
-            # Options: A={q['options']['A']}, B={q['options']['B']},
-            #          C={q['options']['C']}, D={q['options']['D']}
-            # Answer with just the letter (A/B/C/D) or "Not Relevant":
-            # """
-            # answer = call_llm(prompt)
-            # answers.append({"question_number": q["question_number"],
-            #                  "answer": answer})
-
+            answers.append({"question_number": q["question_number"],
+                            "answer": self._answer_question(q)})
         return {"answers": answers}
 
-    def get_score_feedback(self, ctx):
-        """
-        Called when a player submits their final guess.
-        Score their opening sentence guess and associative word guess.
-
-        ctx["dynamic"] contains:
-            season_id, round_number, round_id, game_id, match_id, referee_id,
-            player_id, player_email,
-            book_name, book_hint, association_word,
-            actual_opening_sentence, actual_associative_word,
-            player_guess: {
-                opening_sentence, sentence_justification,
-                associative_word, word_justification, confidence
-            }
-
-        ctx["service"] contains:
-            name, description, required_output_fields, deadline_seconds
-        """
-        dynamic = ctx["dynamic"]
+    def get_score_feedback(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
+        dynamic = ctx.get("dynamic", ctx)
         guess = dynamic["player_guess"]
+        scores = gemini_client.generate_json(self._build_score_prompt(guess))
+        if not self._valid_scores(scores):
+            scores = self._fallback_scores(guess)
+        return self._build_response(scores)
 
-        # ─── YOUR AI LOGIC HERE ───
+    # ── helpers ──────────────────────────────────────────────────────────────
 
-        # Example: simple scoring based on exact match
-        correct_sentence = dynamic.get("actual_opening_sentence",
-            "In my younger and more vulnerable years my father gave me some advice.")
-        correct_word = dynamic.get("actual_associative_word", "green")
+    def _answer_question(self, q: dict) -> str:
+        context = knowledge_base.search(
+            f"150-line limit {q['question_text']}", n_results=2)
+        ctx_text = " ".join(r["content"] for r in context)
+        opts = q.get("options", {})
+        prompt = (
+            f'Answer based on this paragraph: "{self._opening_sentence}"\n'
+            f'Context: {ctx_text}\n\n'
+            f'Question: {q["question_text"]}\n'
+            f'A: {opts.get("A","")}  B: {opts.get("B","")}  '
+            f'C: {opts.get("C","")}  D: {opts.get("D","")}\n'
+            f'Reply only with A, B, C, D, or "Not Relevant".'
+        )
+        try:
+            text = gemini_client.generate(prompt)
+            for ch in text:
+                if ch in "ABCD":
+                    return ch
+            return "Not Relevant"
+        except Exception:
+            return "Not Relevant"
 
-        # Score the opening sentence (50% weight)
-        if guess["opening_sentence"].lower().strip() == correct_sentence.lower().strip():
-            sentence_score = 100.0
-        else:
-            sentence_score = 30.0
-
-        # Score the associative word (20% weight)
-        if guess["associative_word"].lower().strip() == correct_word.lower():
-            word_score = 100.0
-        else:
-            word_score = 20.0
-
-        # Score justifications
-        justification_score = 50.0  # placeholder
-        word_just_score = 50.0      # placeholder
-
-        # Calculate private score (weighted)
-        private_score = (
-            sentence_score * 0.50 +
-            justification_score * 0.20 +
-            word_score * 0.20 +
-            word_just_score * 0.10
+    def _build_score_prompt(self, guess: dict) -> str:
+        return (
+            f'Score this player guess (0-100 each). Return JSON only.\n\n'
+            f'ACTUAL sentence: "{self._opening_sentence}"\n'
+            f'PLAYER sentence: "{guess.get("opening_sentence","")}" '
+            f'(justification: "{guess.get("sentence_justification","")}")\n'
+            f'ACTUAL word: "{self._actual_word}"\n'
+            f'PLAYER word: "{guess.get("associative_word","")}" '
+            f'(justification: "{guess.get("word_justification","")}")\n\n'
+            f'{{"opening_sentence_score":0-100,'
+            f'"sentence_justification_score":0-100,'
+            f'"associative_word_score":0-100,'
+            f'"word_justification_score":0-100,'
+            f'"opening_sentence_feedback":"2-3 sentences",'
+            f'"associative_word_feedback":"2-3 sentences"}}'
         )
 
-        # Map to league points
-        if private_score >= 75:
-            league_points = 3
-        elif private_score >= 50:
-            league_points = 2
-        elif private_score >= 25:
-            league_points = 1
-        else:
-            league_points = 0
+    def _valid_scores(self, s: dict) -> bool:
+        required = ["opening_sentence_score", "sentence_justification_score",
+                    "associative_word_score", "word_justification_score",
+                    "opening_sentence_feedback", "associative_word_feedback"]
+        return all(k in s for k in required)
 
+    def _fallback_scores(self, guess: dict) -> dict:
+        def norm(t): return t.lower().strip()
+        sent = difflib.SequenceMatcher(
+            None, norm(self._opening_sentence),
+            norm(guess.get("opening_sentence", ""))).ratio() * 100
+        word = 100.0 if norm(self._actual_word) == norm(
+            guess.get("associative_word", "")) else 0.0
+        return {"opening_sentence_score": round(sent, 2),
+                "sentence_justification_score": 0.0,
+                "associative_word_score": word,
+                "word_justification_score": 0.0,
+                "opening_sentence_feedback": "Score via string similarity.",
+                "associative_word_feedback": "Score via exact match."}
+
+    def _build_response(self, s: dict) -> dict:
+        private = (s["opening_sentence_score"] * 0.5
+                   + s["sentence_justification_score"] * 0.2
+                   + s["associative_word_score"] * 0.2
+                   + s["word_justification_score"] * 0.1)
         return {
-            "league_points": league_points,
-            "private_score": round(private_score, 1),
-            "breakdown": {
-                "opening_sentence_score": sentence_score,
-                "sentence_justification_score": justification_score,
-                "associative_word_score": word_score,
-                "word_justification_score": word_just_score,
-            },
+            "league_points": self._score_to_league_points(private),
+            "private_score": round(private, 2),
+            "breakdown": {k: s[k] for k in [
+                "opening_sentence_score", "sentence_justification_score",
+                "associative_word_score", "word_justification_score"]},
             "feedback": {
-                "opening_sentence": (
-                    "Your guess for the opening sentence was evaluated against "
-                    "the actual first line of The Great Gatsby. The correct opening "
-                    "is a reflective first-person narration by Nick Carraway about "
-                    "advice his father gave him. Your approach showed understanding "
-                    "of the novel's introspective tone and narrative voice. The "
-                    "justification demonstrated awareness of the 1920s setting and "
-                    "themes of wealth and disillusionment that pervade the story. "
-                    "A stronger answer would have captured the exact phrasing of "
-                    "the vulnerability and advice mentioned in the opening line. "
-                    "The narrative structure of the novel relies heavily on this "
-                    "reflective quality established from the very first sentence. "
-                    "Consider how the narrator's self-awareness shapes the entire "
-                    "story and its themes of memory and judgment."
-                ),
-                "associative_word": (
-                    "The association domain was 'color' and the expected word was "
-                    "'green', representing the iconic green light at the end of "
-                    "Daisy's dock. This symbol is central to the novel's themes "
-                    "of hope, longing, and the American Dream. Your word choice "
-                    "was evaluated for its connection to the book's core symbolism. "
-                    "The green light appears throughout the novel as Gatsby's "
-                    "unreachable aspiration, making it the strongest color "
-                    "association for this particular work of literature. "
-                    "Fitzgerald uses color symbolism extensively, with green "
-                    "representing both envy and hope, while other colors like "
-                    "gold and white carry their own thematic weight throughout "
-                    "the narrative of wealth and corruption in the Jazz Age."
-                ),
-            }
+                "opening_sentence": s["opening_sentence_feedback"],
+                "associative_word": s["associative_word_feedback"]},
         }
+
+    @staticmethod
+    def _score_to_league_points(score: float) -> int:
+        if score >= 80:
+            return 3
+        if score >= 60:
+            return 2
+        if score >= 40:
+            return 1
+        return 0
