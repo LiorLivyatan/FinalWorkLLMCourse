@@ -29,12 +29,12 @@ class MyRefereeAI(RefereeAI):
         self._actual_word = ACTUAL_ASSOCIATION_WORD
 
     def get_warmup_question(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
-        _dynamic = ctx.get("dynamic", ctx)
+        ctx.get("dynamic", ctx)
         return {"warmup_question":
                 "How many items can the average human hold in short-term memory?"}
 
     def get_round_start_info(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
-        _dynamic = ctx.get("dynamic", ctx)
+        ctx.get("dynamic", ctx)
         return {"book_name": BOOK_NAME, "book_hint": BOOK_HINT,
                 "association_word": ASSOCIATION_WORD}
 
