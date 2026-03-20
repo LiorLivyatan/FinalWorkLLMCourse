@@ -1,0 +1,23 @@
+# Q21 Player - AI Strategy Dependencies
+# Install: pip install -r requirements.txt
+
+# Core SDK (local wheel)
+./dist/q21_player-1.0.2-py3-none-any.whl
+
+# RAG Knowledge Base
+agno>=2.4.0
+chromadb>=0.5.0
+pypdf>=4.0.0
+
+# Google AI (Gemini inference + embeddings)
+google-generativeai>=0.8.0
+google-genai>=1.0.0
+
+# Already in wheel but pinned for clarity
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.12.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
