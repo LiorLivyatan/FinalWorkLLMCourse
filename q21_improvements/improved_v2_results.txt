@@ -1,0 +1,176 @@
+2026-03-21 22:17:39,127 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:17:44,934 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+
+[97m[1mQ21 Baseline Eval — 3 scenarios[0m
+INFO Found 4 documents                                                          
+2026-03-21 22:17:45,911 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:47,718 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:49,562 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:51,506 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:52,792 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:54,268 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:55,806 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:56,843 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:58,155 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:17:59,334 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:00,464 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:01,535 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:02,867 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:04,100 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:06,451 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:08,076 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:09,218 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:10,447 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:11,768 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:12,715 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:18:13,334 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 10 documents                                                         
+INFO Found 5 documents                                                          
+2026-03-21 22:18:16,796 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:18:19,670 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:18:21,138 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:27,212 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:28,970 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:30,018 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:31,636 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:32,714 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:33,781 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:35,127 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:36,357 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:37,594 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:39,056 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:40,352 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:42,086 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:43,244 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:44,301 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:45,878 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:47,037 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:48,233 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:49,445 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:50,771 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:18:52,124 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:18:53,034 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 10 documents                                                         
+INFO Found 5 documents                                                          
+2026-03-21 22:18:55,908 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:19:00,280 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:19:02,047 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:08,415 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:09,729 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:11,036 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:12,398 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:13,738 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:14,964 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:16,810 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:17,993 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:19,260 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:20,366 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:21,906 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:23,145 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:24,175 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:25,298 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:27,027 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:29,331 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:30,801 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:32,081 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:33,394 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 4 documents                                                          
+2026-03-21 22:19:34,930 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:19:35,735 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 10 documents                                                         
+INFO Found 5 documents                                                          
+2026-03-21 22:19:39,197 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 22:19:44,406 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+
+[36m[1m━━━ The Non-Arbitrary Line Limit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Guessed: [2m"In stage 3, the merging of the work, the agents merge the re…"[0m
+  Actual:  [2m"The 150-line limit per file is not an arbitrary number."[0m
+  [91m[1m[FAIL][0m Sentence: 28.0%
+  Word: [33mChunking[0m vs [33mchunk[0m
+  [91m[1m[FAIL][0m Word: 0%
+  [92m[1m[PASS][0m Not Relevant: 4
+  [97mScore: 44.0  Points: 0[0m
+
+[36m[1m━━━ System Design Principles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Guessed: [2m"The League Layer is responsible for registering players and …"[0m
+  Actual:  [2m"The system was designed according to several guiding princip…"[0m
+  [91m[1m[FAIL][0m Sentence: 21.1%
+  Word: [33minteroperability[0m vs [33mseparation[0m
+  [91m[1m[FAIL][0m Word: 0%
+  [91m[1m[FAIL][0m Not Relevant: 6
+  [97mScore: 40.6  Points: 0[0m
+
+[36m[1m━━━ Gmail as Agent Transport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Guessed: [2m"The Q21G League Final Project is an "email-based agent" arch…"[0m
+  Actual:  [2m"Unlike traditional architectures that use HTTP servers, the …"[0m
+  [91m[1m[FAIL][0m Sentence: 36.7%
+  Word: [33mSMTP[0m vs [33masynchronous[0m
+  [91m[1m[FAIL][0m Word: 0%
+  [92m[1m[PASS][0m Not Relevant: 2
+  [97mScore: 48.4  Points: 0[0m
+
+[36m[1m━━━ AGGREGATE (3 scenarios) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  [91m[1m[FAIL][0m Win Rate:     0/3 (0.0%)
+  [91m[1m[FAIL][0m Word Accuracy: 0/3 (0.0%)
+  [92m[1m[PASS][0m Avg NR:       4.0
+  [97mAvg Score: 44.3[0m
+
+  [2mResults saved to /Users/roeirahamim/Documents/MSC/LLM_Agents/FinalWorkLLMCourse/q21_improvements/eval_results.json[0m
