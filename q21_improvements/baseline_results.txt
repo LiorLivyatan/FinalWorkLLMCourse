@@ -1,0 +1,47 @@
+2026-03-21 21:21:06,099 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 21:21:10,987 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+
+[97m[1mQ21 Baseline Eval — 3 scenarios[0m
+INFO Found 5 documents                                                          
+2026-03-21 21:21:12,352 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 21:21:14,300 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 5 documents                                                          
+2026-03-21 21:21:19,670 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2026-03-21 21:21:21,646 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+INFO Found 5 documents                                                          
+2026-03-21 21:21:27,068 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+
+[36m[1m━━━ The Non-Arbitrary Line Limit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Guessed: [2m"4.3.1 אקוודהמל 150? תלבגמ 150:לעתססובמאיה.יתורירשרפסמאלאיהץב…"[0m
+  Actual:  [2m"The 150-line limit per file is not an arbitrary number."[0m
+  [91m[1m[FAIL][0m Sentence: 2.7%
+  Word: [33mCognition[0m vs [33mchunk[0m
+  [91m[1m[FAIL][0m Word: 0%
+  [91m[1m[FAIL][0m Not Relevant: 20
+  [97mScore: 22.3  Points: 0[0m
+
+[36m[1m━━━ System Design Principles ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Guessed: [2m"תגיל Q21G רמג טקיורפ Q21G League - Final Project תרושקתה לוק…"[0m
+  Actual:  [2m"The system was designed according to several guiding princip…"[0m
+  [91m[1m[FAIL][0m Sentence: 14.3%
+  Word: [33mProtocol[0m vs [33mseparation[0m
+  [91m[1m[FAIL][0m Word: 0%
+  [91m[1m[FAIL][0m Not Relevant: 15
+  [97mScore: 28.1  Points: 0[0m
+
+[36m[1m━━━ Gmail as Agent Transport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  Guessed: [2m"תיתוכאלמהניבינכוס לדומהרשקהלוקוטורפםע AI Agents with Model C…"[0m
+  Actual:  [2m"Unlike traditional architectures that use HTTP servers, the …"[0m
+  [91m[1m[FAIL][0m Sentence: 14.3%
+  Word: [33minbox[0m vs [33masynchronous[0m
+  [91m[1m[FAIL][0m Word: 0%
+  [91m[1m[FAIL][0m Not Relevant: 16
+  [97mScore: 28.2  Points: 0[0m
+
+[36m[1m━━━ AGGREGATE (3 scenarios) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  [91m[1m[FAIL][0m Win Rate:     0/3 (0.0%)
+  [91m[1m[FAIL][0m Word Accuracy: 0/3 (0.0%)
+  [91m[1m[FAIL][0m Avg NR:       17.0
+  [97mAvg Score: 26.2[0m
+
+  [2mResults saved to /Users/roeirahamim/Documents/MSC/LLM_Agents/FinalWorkLLMCourse/q21_improvements/eval_results.json[0m
