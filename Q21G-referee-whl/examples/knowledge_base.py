@@ -25,10 +25,10 @@ _knowledge: Optional[Knowledge] = None
 
 
 def _build_knowledge() -> Knowledge:
-    chroma_path = os.getenv("CHROMA_PATH", "tmp/chromadb")
+    chroma_path = os.getenv("CHROMA_PATH", "../database")
     return Knowledge(
         vector_db=ChromaDb(
-            collection="mcp_book",
+            collection="course_material",
             path=chroma_path,
             persistent_client=True,
             embedder=GeminiEmbedder(
@@ -59,7 +59,7 @@ def ensure_indexed() -> None:
             f"Course material not found at: {material_dir.resolve()}"
         )
 
-    chroma_path = os.getenv("CHROMA_PATH", "tmp/chromadb")
+    chroma_path = os.getenv("CHROMA_PATH", "../database")
     flag_file = Path(chroma_path) / ".indexed"
     if flag_file.exists():
         return

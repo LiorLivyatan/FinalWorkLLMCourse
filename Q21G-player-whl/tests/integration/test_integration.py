@@ -38,7 +38,7 @@ class TestGeminiConnection:
 class TestKnowledgeBase:
     def test_search_existing_index(self):
         """Search the pre-built index (must run indexing first)."""
-        chroma_path = os.getenv("CHROMA_PATH", "database")
+        chroma_path = os.getenv("CHROMA_PATH", "../database")
         flag = os.path.join(chroma_path, ".indexed")
         if not os.path.exists(flag):
             pytest.skip("Index not built yet — run ensure_indexed() first")

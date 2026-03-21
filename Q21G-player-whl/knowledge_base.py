@@ -26,7 +26,7 @@ _knowledge: Optional[Knowledge] = None
 
 def _build_knowledge() -> Knowledge:
     """Create a new Knowledge instance backed by ChromaDB + Gemini."""
-    chroma_path = os.getenv("CHROMA_PATH", "database")
+    chroma_path = os.getenv("CHROMA_PATH", "../database")
     return Knowledge(
         vector_db=ChromaDb(
             collection="course_material",
@@ -65,7 +65,7 @@ def ensure_indexed() -> None:
             f"Course material not found at: {material_dir.resolve()}"
         )
 
-    chroma_path = os.getenv("CHROMA_PATH", "database")
+    chroma_path = os.getenv("CHROMA_PATH", "../database")
     flag_file = Path(chroma_path) / ".indexed"
 
     if flag_file.exists():

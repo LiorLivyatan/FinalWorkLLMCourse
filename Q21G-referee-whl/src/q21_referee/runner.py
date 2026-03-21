@@ -78,8 +78,11 @@ class RefereeRunner:
             league_id=c["league_id"],
             season_id=c["season_id"],
         )
+        from ._gmc.deadline_tracker import DeadlineTracker
+        self.deadline_tracker = DeadlineTracker()
         self.router = MessageRouter(
-            ai=self.ai, state=self.state, builder=self.builder, config=c
+            ai=self.ai, state=self.state, builder=self.builder, config=c,
+            deadline_tracker=self.deadline_tracker,
         )
 
     def run(self) -> None:
