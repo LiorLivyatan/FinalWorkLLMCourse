@@ -60,8 +60,7 @@ class MyRefereeAI(RefereeAI):
     # ── helpers ──────────────────────────────────────────────────────────────
 
     def _answer_question(self, q: dict) -> str:
-        context = knowledge_base.search(
-            f"150-line limit {q['question_text']}", n_results=2)
+        context = knowledge_base.search(q['question_text'], n_results=4)
         ctx_text = " ".join(r["content"] for r in context)
         opts = q.get("options", {})
         prompt = (
@@ -70,7 +69,8 @@ class MyRefereeAI(RefereeAI):
             f'Question: {q["question_text"]}\n'
             f'A: {opts.get("A","")}  B: {opts.get("B","")}  '
             f'C: {opts.get("C","")}  D: {opts.get("D","")}\n'
-            f'Reply only with A, B, C, D, or "Not Relevant".'
+            f'Answer A/B/C/D if determinable from the sentence or context. '
+            f'Use "Not Relevant" ONLY if completely absent from both.'
         )
         try:
             text = gemini_client.generate(prompt)
@@ -91,6 +91,8 @@ class MyRefereeAI(RefereeAI):
             f'ACTUAL association word: "{self._actual_word}"\n'
             f'PLAYER association word: "{guess.get("associative_word", "")}"\n'
             f'Player word justification: "{guess.get("word_justification", "")}"\n\n'
+            f'If the player sentence is semantically equivalent but in a different '
+            f'language, award partial credit proportional to conceptual accuracy.\n'
             f'Score each item 0-100. Return ONLY valid JSON:\n'
             f'{{"opening_sentence_score": <int 0-100>,'
             f'"sentence_justification_score": <int 0-100>,'
