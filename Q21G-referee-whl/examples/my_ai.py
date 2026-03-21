@@ -18,6 +18,7 @@ import knowledge_base
 from book_config import (
     BOOK_NAME, BOOK_HINT, ASSOCIATION_WORD,
     ACTUAL_ASSOCIATION_WORD, OPENING_SENTENCE,
+    FALLBACK_SENTENCE_FEEDBACK, FALLBACK_WORD_FEEDBACK,
 )
 
 
@@ -27,14 +28,15 @@ class MyRefereeAI(RefereeAI):
     def __init__(self) -> None:
         self._opening_sentence = OPENING_SENTENCE
         self._actual_word = ACTUAL_ASSOCIATION_WORD
+        knowledge_base.ensure_indexed()
 
     def get_warmup_question(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
-        ctx.get("dynamic", ctx)
+        dynamic = ctx.get("dynamic", ctx)  # noqa: F841
         return {"warmup_question":
                 "How many items can the average human hold in short-term memory?"}
 
     def get_round_start_info(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
-        ctx.get("dynamic", ctx)
+        dynamic = ctx.get("dynamic", ctx)  # noqa: F841
         return {"book_name": BOOK_NAME, "book_hint": BOOK_HINT,
                 "association_word": ASSOCIATION_WORD}
 
@@ -81,19 +83,21 @@ class MyRefereeAI(RefereeAI):
 
     def _build_score_prompt(self, guess: dict) -> str:
         return (
-            f'Score this player guess (0-100 each). Return JSON only.\n\n'
-            f'ACTUAL sentence: "{self._opening_sentence}"\n'
-            f'PLAYER sentence: "{guess.get("opening_sentence","")}" '
-            f'(justification: "{guess.get("sentence_justification","")}")\n'
-            f'ACTUAL word: "{self._actual_word}"\n'
-            f'PLAYER word: "{guess.get("associative_word","")}" '
-            f'(justification: "{guess.get("word_justification","")}")\n\n'
-            f'{{"opening_sentence_score":0-100,'
-            f'"sentence_justification_score":0-100,'
-            f'"associative_word_score":0-100,'
-            f'"word_justification_score":0-100,'
-            f'"opening_sentence_feedback":"2-3 sentences",'
-            f'"associative_word_feedback":"2-3 sentences"}}'
+            f'Score a player guess for the Q21 game. '
+            f'Return ONLY valid JSON with exactly these keys.\n\n'
+            f'ACTUAL opening sentence: "{self._opening_sentence}"\n'
+            f'PLAYER opening sentence: "{guess.get("opening_sentence", "")}"\n'
+            f'Player sentence justification: "{guess.get("sentence_justification", "")}"\n\n'
+            f'ACTUAL association word: "{self._actual_word}"\n'
+            f'PLAYER association word: "{guess.get("associative_word", "")}"\n'
+            f'Player word justification: "{guess.get("word_justification", "")}"\n\n'
+            f'Score each item 0-100. Return ONLY valid JSON:\n'
+            f'{{"opening_sentence_score": <int 0-100>,'
+            f'"sentence_justification_score": <int 0-100>,'
+            f'"associative_word_score": <int 0-100>,'
+            f'"word_justification_score": <int 0-100>,'
+            f'"opening_sentence_feedback": "<150-200 words of feedback>",'
+            f'"associative_word_feedback": "<150-200 words of feedback>"}}'
         )
 
     def _valid_scores(self, s: dict) -> bool:
@@ -113,8 +117,8 @@ class MyRefereeAI(RefereeAI):
                 "sentence_justification_score": 0.0,
                 "associative_word_score": word,
                 "word_justification_score": 0.0,
-                "opening_sentence_feedback": "Score via string similarity.",
-                "associative_word_feedback": "Score via exact match."}
+                "opening_sentence_feedback": FALLBACK_SENTENCE_FEEDBACK,
+                "associative_word_feedback": FALLBACK_WORD_FEEDBACK}
 
     def _build_response(self, s: dict) -> dict:
         private = (s["opening_sentence_score"] * 0.5

@@ -22,3 +22,24 @@ ACTUAL_ASSOCIATION_WORD = "seven"
 
 # Actual opening sentence of Section 4.3
 OPENING_SENTENCE = "The 150-line limit per file is not an arbitrary number."
+
+# Fallback feedback strings (150-200 words) used when Gemini scoring fails
+FALLBACK_SENTENCE_FEEDBACK = (
+    "The opening sentence score was calculated using string similarity "
+    "comparison between the player's guess and the actual opening sentence. "
+    "The score reflects the degree of textual overlap in terms of word choice, "
+    "phrasing, and sentence structure. A higher score indicates the guess closely "
+    "matched the actual sentence, while a lower score suggests the guess diverged "
+    "significantly in wording or meaning. To improve, focus on identifying precise "
+    "language patterns from the answers provided during the question phase."
+)
+
+FALLBACK_WORD_FEEDBACK = (
+    "The associative word score was determined by exact match comparison between "
+    "the player's guessed word and the actual association word chosen by the referee. "
+    "An exact match yields full marks; any other word receives zero. The association "
+    "word is chosen to reflect a deep thematic or conceptual connection to the "
+    "source material. To improve, consider the broader intellectual domain suggested "
+    "by the book hint and the pattern of answers received, then select the single "
+    "word that best captures the underlying concept."
+)

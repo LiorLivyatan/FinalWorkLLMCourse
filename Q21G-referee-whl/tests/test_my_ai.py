@@ -77,6 +77,14 @@ def test_answers_partial_failure_continues():
     assert answers[3] == "C"
 
 
+def test_answers_all_gibberish_returns_not_relevant():
+    ai = MyRefereeAI()
+    with patch("gemini_client.generate", return_value="gibberish!"), \
+         patch("knowledge_base.search", return_value=[]):
+        result = ai.get_answers(make_answers_ctx(make_questions(3)))
+    assert all(a["answer"] == "Not Relevant" for a in result["answers"])
+
+
 def test_answers_wrapped_and_raw():
     ai = MyRefereeAI()
     with patch("gemini_client.generate", return_value="A"), \
@@ -114,6 +122,14 @@ def test_score_wrapped_and_raw():
         r1 = ai.get_score_feedback(make_score_ctx(True))
         r2 = ai.get_score_feedback(make_score_ctx(False))
     assert r1["league_points"] == r2["league_points"]
+
+
+def test_score_none_actuals_use_instance_state():
+    """actual_opening_sentence/actual_associative_word may be None — instance state used."""
+    ai = MyRefereeAI()
+    with patch("gemini_client.generate_json", return_value=VALID_SCORES):
+        result = ai.get_score_feedback(make_score_ctx())  # both actuals are None
+    assert "league_points" in result  # no crash, scores from instance state
 
 
 @pytest.mark.parametrize("score,pts", [
