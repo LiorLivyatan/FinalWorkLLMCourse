@@ -61,7 +61,7 @@ class MyPlayerAI(PlayerAI):
 
     def on_score_received(self, ctx: dict) -> None:
         points = ctx["dynamic"].get("league_points", 0)
-        match_id = ctx["dynamic"].get("match_id", "unknown")
+        match_id = ctx.get("service", {}).get("match_id", "unknown")
         print(f"Game {match_id} complete! Scored {points} points.")
 
 

@@ -6,7 +6,7 @@ Uses Agno's Knowledge + ChromaDB (local, persistent) + GeminiEmbedder.
 PDFs are indexed once on first run; subsequent runs reuse the index.
 
 Environment variables:
-    CHROMA_PATH          - ChromaDB storage path (default: tmp/chromadb)
+    CHROMA_PATH          - ChromaDB storage path (default: database)
     COURSE_MATERIAL_PATH - Directory containing the 22 course PDFs
     GOOGLE_API_KEY       - Required by GeminiEmbedder
 """
@@ -26,7 +26,7 @@ _knowledge: Optional[Knowledge] = None
 
 def _build_knowledge() -> Knowledge:
     """Create a new Knowledge instance backed by ChromaDB + Gemini."""
-    chroma_path = os.getenv("CHROMA_PATH", "tmp/chromadb")
+    chroma_path = os.getenv("CHROMA_PATH", "database")
     return Knowledge(
         vector_db=ChromaDb(
             collection="course_material",
@@ -65,7 +65,7 @@ def ensure_indexed() -> None:
             f"Course material not found at: {material_dir.resolve()}"
         )
 
-    chroma_path = os.getenv("CHROMA_PATH", "tmp/chromadb")
+    chroma_path = os.getenv("CHROMA_PATH", "database")
     flag_file = Path(chroma_path) / ".indexed"
 
     if flag_file.exists():
