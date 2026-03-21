@@ -34,7 +34,7 @@ def _build_knowledge() -> Knowledge:
             persistent_client=True,
             embedder=GeminiEmbedder(
                 id="gemini-embedding-2-preview",
-                vertexai=True,
+                vertexai=False,
             ),
         ),
     )
