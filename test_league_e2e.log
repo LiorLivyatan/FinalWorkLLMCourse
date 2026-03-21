@@ -1,0 +1,158 @@
+[97m[1m======================================================================[0m
+[97m[1m  Q21 League E2E: MyRefereeAI + MyPlayerAI[0m
+[97m[1m  Real Gemini LLM + Shared ChromaDB RAG[0m
+[97m[1m======================================================================[0m
+[2m
+Initializing both AIs (knowledge base check)...[0m
+[2m  Both AIs initialized.
+[0m
+
+[33m[1m━━━ Phase 1: WARMUP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[34m[1m[REFEREE][0m [34mAsks: "How many items can the average human hold in short-term memory?"[0m
+[32m[1m[PLAYER][0m [32mAnswers: "7"[0m
+
+[36m[1m━━━ Phase 2: ROUND START ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[34m[1m[REFEREE][0m [34mBook:             "The Non-Arbitrary Line Limit"[0m
+[34m[1m[REFEREE][0m [34mHint:             "A coding constraint whose precise threshold mirrors psychological research on human attention span boundaries"[0m
+[34m[1m[REFEREE][0m [34mAssociation word:  "cognition"[0m
+
+[35m[1m━━━ Phase 3: QUESTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[32m[1m[PLAYER][0m [32mGenerated 20 strategic questions:[0m
+  [35mQ 1[0m [2m[Tier 1 (chapter)][0m Is the chapter focused primarily on the history of programming la
+       [2mA: Yes  B: No  C: Maybe  D: It is focused on cognitiv[0m
+  [35mQ 2[0m [2m[Tier 1 (chapter)][0m Does the chapter discuss the Miller's Law (7 +/- 2) specifically?
+       [2mA: Yes  B: No  C: Only as a secondary point  D: It discusses chunking the[0m
+  [35mQ 3[0m [2m[Tier 1 (chapter)][0m Is the broad topic of the book technical manual style or narrativ
+       [2mA: Technical manual  B: Narrative essay  C: Academic treatise  D: Satirical fiction[0m
+  [35mQ 4[0m [2m[Tier 1 (chapter)][0m Does the opening chapter center on the IDE interface or the code 
+       [2mA: The IDE interface  B: The code text itself  C: Human psychology  D: The compiler[0m
+  [35mQ 5[0m [2m[Tier 1 (chapter)][0m Is the chapter concerned with the 'readability' metric of softwar
+       [2mA: Yes  B: No  C: Related to maintenance  D: Related to performance[0m
+  [35mQ 6[0m [2m[Tier 1 (chapter)][0m Does the chapter focus on the transition from analog paper to dig
+       [2mA: Yes  B: No  C: It focuses on scroll bars  D: It focuses on monitors[0m
+  [35mQ 7[0m [2m[Tier 1 (chapter)][0m Is the chapter theme about human error or machine efficiency?
+       [2mA: Human error  B: Machine efficiency  C: Both  D: Neither[0m
+  [35mQ 8[0m [2m[Tier 2 (paragraph)][0m Is the first paragraph an anecdote about a famous programmer?
+       [2mA: Yes  B: No  C: It is a definition  D: It is a philosophical que[0m
+  [35mQ 9[0m [2m[Tier 2 (paragraph)][0m Does the paragraph theme focus on the visual 'weight' of text blo
+       [2mA: Yes  B: No  C: It focuses on whitespace  D: It focuses on indentation[0m
+  [35mQ10[0m [2m[Tier 2 (paragraph)][0m Is the sentence structure of the first paragraph complex or simpl
+       [2mA: Simple  B: Complex  C: Compound-complex  D: Fragmented[0m
+  [35mQ11[0m [2m[Tier 2 (paragraph)][0m Does the opening paragraph mention 'the number eighty'?
+       [2mA: Yes  B: No  C: It mentions sixty  D: It mentions one hundred[0m
+  [35mQ12[0m [2m[Tier 2 (paragraph)][0m Is the tone of the opening paragraph formal or conversational?
+       [2mA: Formal  B: Conversational  C: Dry/Academic  D: Playful[0m
+  [35mQ13[0m [2m[Tier 2 (paragraph)][0m Does the paragraph open with an observation about the eye's movem
+       [2mA: Yes  B: No  C: It opens with a quote  D: It opens with a definitio[0m
+  [35mQ14[0m [2m[Tier 2 (paragraph)][0m Is the paragraph focused on the constraints of terminal width?
+       [2mA: Yes  B: No  C: It focuses on variable le  D: It focuses on indentation[0m
+  [35mQ15[0m [2m[Tier 3 (sentence)][0m Does the sentence contain the word 'cognition' or a synonym?
+       [2mA: Yes  B: No  C: It uses 'mental'  D: It uses 'thought'[0m
+  [35mQ16[0m [2m[Tier 3 (sentence)][0m Does the sentence start with a prepositional phrase?
+       [2mA: Yes  B: No  C: It starts with a noun  D: It starts with an adverb[0m
+  [35mQ17[0m [2m[Tier 3 (sentence)][0m Is the sentence longer than 20 words?
+       [2mA: Yes  B: No  C: Exactly 20  D: Unsure[0m
+  [35mQ18[0m [2m[Tier 3 (sentence)][0m Does the sentence use the word 'boundary'?
+       [2mA: Yes  B: No  C: It uses 'limit'  D: It uses 'threshold'[0m
+  [35mQ19[0m [2m[Tier 3 (sentence)][0m Is there a mention of the 'mind' in the opening sentence?
+       [2mA: Yes  B: No  C: Mentions 'brain'  D: Mentions 'human'[0m
+  [35mQ20[0m [2m[Tier 3 (sentence)][0m Does the sentence end with the word 'limitation'?
+       [2mA: Yes  B: No  C: It ends with 'constraint'  D: It ends with a period aft[0m
+
+[34m[1m━━━ Phase 4: ANSWERS (Referee RAG) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+INFO Using Vertex AI API for embeddings                                         
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+INFO Found 2 documents                                                          
+[34m[1m[REFEREE][0m [34mAnswered 20 questions using RAG + Gemini:[0m
+  [34mQ 1[0m → [34m[1m            B[0m  [2mIs the chapter focused primarily on the history of prog[0m
+  [34mQ 2[0m → [34m[1m            A[0m  [2mDoes the chapter discuss the Miller's Law (7 +/- 2) spe[0m
+  [34mQ 3[0m → [34m[1m            A[0m  [2mIs the broad topic of the book technical manual style o[0m
+  [34mQ 4[0m → [2m[1m Not Relevant[0m  [2mDoes the opening chapter center on the IDE interface or[0m
+  [34mQ 5[0m → [34m[1m            A[0m  [2mIs the chapter concerned with the 'readability' metric [0m
+  [34mQ 6[0m → [2m[1m Not Relevant[0m  [2mDoes the chapter focus on the transition from analog pa[0m
+  [34mQ 7[0m → [34m[1m            B[0m  [2mIs the chapter theme about human error or machine effic[0m
+  [34mQ 8[0m → [34m[1m            B[0m  [2mIs the first paragraph an anecdote about a famous progr[0m
+  [34mQ 9[0m → [34m[1m            B[0m  [2mDoes the paragraph theme focus on the visual 'weight' o[0m
+  [34mQ10[0m → [34m[1m            A[0m  [2mIs the sentence structure of the first paragraph comple[0m
+  [34mQ11[0m → [34m[1m            B[0m  [2mDoes the opening paragraph mention 'the number eighty'?[0m
+  [34mQ12[0m → [34m[1m            C[0m  [2mIs the tone of the opening paragraph formal or conversa[0m
+  [34mQ13[0m → [34m[1m            B[0m  [2mDoes the paragraph open with an observation about the e[0m
+  [34mQ14[0m → [34m[1m            B[0m  [2mIs the paragraph focused on the constraints of terminal[0m
+  [34mQ15[0m → [2m[1m Not Relevant[0m  [2mDoes the sentence contain the word 'cognition' or a syn[0m
+  [34mQ16[0m → [2m[1m Not Relevant[0m  [2mDoes the sentence start with a prepositional phrase?[0m
+  [34mQ17[0m → [2m[1m Not Relevant[0m  [2mIs the sentence longer than 20 words?[0m
+  [34mQ18[0m → [2m[1m Not Relevant[0m  [2mDoes the sentence use the word 'boundary'?[0m
+  [34mQ19[0m → [2m[1m Not Relevant[0m  [2mIs there a mention of the 'mind' in the opening sentenc[0m
+  [34mQ20[0m → [2m[1m Not Relevant[0m  [2mDoes the sentence end with the word 'limitation'?[0m
+[2m
+  ⏳ Waiting 45s for Gemini rate limit reset (referee used ~20 calls)...[0m
+
+[92m[1m━━━ Phase 5: GUESS (Player RAG) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+INFO Found 5 documents                                                          
+[32m[1m[PLAYER][0m [32mOpening sentence guess:[0m
+  [92m[1m"Dedicated To all researchers and developers Working to understand the inner workings of Transformer models"[0m
+[32m[1m[PLAYER][0m [32mConfidence: 0.9[0m
+[32m[1m[PLAYER][0m [32mAssociation word: "cognition"[0m
+[32m[1m[PLAYER][0m [32mSentence justification:[0m
+  [2mThe provided candidate paragraphs include a dedication section translated into Hebrew and English. As the book is titled 'The Non-Arbitrary Line Limit' and focuses on technical coding constraints rela[0m
+[32m[1m[PLAYER][0m [32mWord justification:[0m
+  [2mThe word cognition is chosen because the book's core premise links the '150-line' coding limit to psychological research regarding human attention spans. By drawing this parallel, the author treats so[0m
+
+[91m[1m━━━ Phase 6: SCORING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[34m[1m[REFEREE][0m [34mScoring complete:[0m
+  [91mLeague points:[0m  [91m[1m0[0m
+  [91mPrivate score:[0m  [1m17.5[0m
+  [91mBreakdown:[0m
+    Opening Sentence          [91m██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   5.0[0m [2m50%[0m
+    Sentence Justification    [33m████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  40.0[0m [2m20%[0m
+    Associative Word          [91m█████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  10.0[0m [2m20%[0m
+    Word Justification        [33m█████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░  50.0[0m [2m10%[0m
+[34m[1m[REFEREE][0m [34mFeedback on opening sentence:[0m
+  [2mThe opening sentence guess is conceptually disconnected from the actual text. While your dedication is well-written and fits the theme of academic technical writing, it fails to match the actual source material, which begins with a direct, provocative statement regarding a specific technical constra[0m
+[34m[1m[REFEREE][0m [34mFeedback on association word:[0m
+  [2mThe choice of 'cognition' as the association word is theoretically sound based on the book's themes, but it misses the mark regarding the specific word required for the game. The actual association word, 'seven', serves as a critical bridge to the 'Magical Number Seven, Plus or Minus Two' theory by [0m
+
+[37m[1m━━━ Phase 7: SCORE RECEIVED ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+Game R1M1 complete! Scored 0 points.
+[32m[1m[PLAYER][0m [32mScore acknowledged.[0m
+
+[97m[1m━━━ Validation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  [92m[1m[PASS][0m Warmup question is non-empty
+  [92m[1m[PASS][0m Warmup answer is non-empty
+  [92m[1m[PASS][0m Book name provided
+  [92m[1m[PASS][0m Generated 20 questions
+  [92m[1m[PASS][0m Referee answered all questions
+  [92m[1m[PASS][0m Answers are valid (A/B/C/D/NR)
+  [92m[1m[PASS][0m Guess has opening_sentence
+  [92m[1m[PASS][0m Guess has justification (35+ words)
+  [92m[1m[PASS][0m Guess confidence in [0,1]
+  [92m[1m[PASS][0m Score has league_points
+  [92m[1m[PASS][0m Score has all breakdown keys
+  [92m[1m[PASS][0m Score has feedback for both
+
+[97m[1m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+  [92m[1m✓ FULL LEAGUE E2E PASSED — all 12 checks green[0m
+
+  [34mReferee book:[0m    "The Non-Arbitrary Line Limit"
+  [34mActual sentence:[0m "The 150-line limit per file is not an arbitrary number."
+  [32mPlayer guess:[0m    "Dedicated To all researchers and developers Working to understand the inner workings of Transformer "
+  [91mFinal score:[0m     17.5 private / 0 league pts
+[97m[1m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
