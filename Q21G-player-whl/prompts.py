@@ -38,6 +38,18 @@ Reply with ONLY valid JSON:
 ]}}"""
 
 
+def _format_answer(a: dict) -> str:
+    """Format a single Q&A pair, resolving the answer letter to option text."""
+    qnum = a["question_number"]
+    q_text = a.get("question_text", "")
+    letter = a["answer"]
+    opts = a.get("options", {})
+    selected = opts.get(letter, letter)  # resolve "B" → actual option text
+    if q_text:
+        return f"Q{qnum}: {q_text} → {selected}"
+    return f"Q{qnum}: → {selected}"
+
+
 def build_hyde_prompt(
     book_name: str, book_hint: str, association_word: str,
     answers: list[dict],
@@ -47,10 +59,7 @@ def build_hyde_prompt(
     Must be Hebrew because the RAG index uses Hebrew source material
     with multilingual embeddings — Hebrew queries match best.
     """
-    answers_str = "\n".join(
-        f"Q{a['question_number']}: {a.get('question_text', '')} → {a['answer']}"
-        for a in answers
-    )
+    answers_str = "\n".join(_format_answer(a) for a in answers)
     return f"""Based on a 21-questions game about a Hebrew textbook paragraph,
 synthesize a hypothetical paragraph IN HEBREW that matches ALL these clues.
 
@@ -78,9 +87,7 @@ def build_deliberation_prompt(
 
     Candidates are likely in Hebrew — the prompt handles both languages.
     """
-    answers_str = "\n".join(
-        f"Q{a['question_number']}: {a['answer']}" for a in answers
-    )
+    answers_str = "\n".join(_format_answer(a) for a in answers)
     return f"""Evaluate candidate paragraphs for a 21-questions game.
 The candidates may be in Hebrew — evaluate their CONTENT regardless of language.
 
@@ -109,9 +116,7 @@ def build_guess_prompt(
     answers: list[dict], candidates_text: str,
 ) -> str:
     """Final guess extraction — handles Hebrew source, English output."""
-    answers_str = "\n".join(
-        f"Q{a['question_number']}: {a['answer']}" for a in answers
-    )
+    answers_str = "\n".join(_format_answer(a) for a in answers)
     return f"""You are making your FINAL GUESS in a 21-questions game.
 
 Book: "{book_name}"

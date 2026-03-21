@@ -85,20 +85,20 @@ def test_empty_guess_scores_zero():
 
 # ── Tests: _score_to_league_points() ─────────────────────────────
 
-def test_points_3_at_90():
-    assert _score_to_league_points(90.0) == 3
+def test_points_3_at_80():
+    assert _score_to_league_points(80.0) == 3
     assert _score_to_league_points(95.5) == 3
 
-def test_points_2_at_80():
-    assert _score_to_league_points(80.0) == 2
-    assert _score_to_league_points(89.9) == 2
+def test_points_2_at_60():
+    assert _score_to_league_points(60.0) == 2
+    assert _score_to_league_points(79.9) == 2
 
-def test_points_1_at_60():
-    assert _score_to_league_points(60.0) == 1
-    assert _score_to_league_points(79.9) == 1
+def test_points_1_at_40():
+    assert _score_to_league_points(40.0) == 1
+    assert _score_to_league_points(59.9) == 1
 
-def test_points_0_below_60():
-    assert _score_to_league_points(59.9) == 0
+def test_points_0_below_40():
+    assert _score_to_league_points(39.9) == 0
     assert _score_to_league_points(0.0) == 0
 
 

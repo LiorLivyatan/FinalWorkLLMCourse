@@ -20,10 +20,15 @@ from prompts import (
 
 
 class MyPlayerAI(PlayerAI):
-    """Player AI that uses RAG to find real opening sentences."""
+    """Player AI that uses RAG to find real opening sentences.
+
+    Stores questions between callbacks because the real game only
+    passes answer letters (A/B/C/D) back — not the question texts.
+    """
 
     def __init__(self):
         ensure_indexed()
+        self._last_questions = []  # stored for use in get_guess()
 
     def get_warmup_answer(self, ctx: dict) -> dict:
         question = ctx["dynamic"]["warmup_question"]
@@ -45,6 +50,7 @@ class MyPlayerAI(PlayerAI):
         questions = result.get("questions", [])
         if len(questions) != 20:
             questions = _fallback_questions(book_name)
+        self._last_questions = questions  # store for get_guess()
         return {"questions": questions}
 
     def get_guess(self, ctx: dict) -> dict:
@@ -53,9 +59,21 @@ class MyPlayerAI(PlayerAI):
         association_word = ctx["dynamic"].get("association_word", "")
         answers = ctx["dynamic"]["answers"]
 
+        # Enrich answers with stored question texts (real game only
+        # sends question_number + answer letter, not question_text)
+        q_by_num = {q["question_number"]: q for q in self._last_questions}
+        enriched = []
+        for a in answers:
+            q = q_by_num.get(a["question_number"], {})
+            enriched.append({
+                **a,
+                "question_text": q.get("question_text", ""),
+                "options": q.get("options", {}),
+            })
+
         # ── Step 1: HyDE — synthesize hypothetical paragraph ─────
         hyde_prompt = build_hyde_prompt(
-            book_name, book_hint, association_word, answers,
+            book_name, book_hint, association_word, enriched,
         )
         hypothetical_text = generate(hyde_prompt)
 

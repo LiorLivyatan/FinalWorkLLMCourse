@@ -21,12 +21,15 @@ knowledge_base.ensure_indexed()
 
 
 def _score_to_league_points(private_score: float) -> int:
-    """Convert private score to league points using official thresholds."""
-    if private_score >= 90:
-        return 3
+    """Convert private score to league points using official thresholds.
+
+    Per types.py: 3 if >=80, 2 if >=60, 1 if >=40, else 0.
+    """
     if private_score >= 80:
-        return 2
+        return 3
     if private_score >= 60:
+        return 2
+    if private_score >= 40:
         return 1
     return 0
 
