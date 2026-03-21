@@ -208,3 +208,221 @@ Run with:
 uv pip install -e "."          # install package (once per environment)
 uv run pytest tests/ -v
 ```
+
+---
+
+## Detailed Code Logic
+
+### `MyRefereeAI.__init__`
+
+```python
+def __init__(self) -> None:
+    self._opening_sentence = OPENING_SENTENCE
+    self._actual_word = ACTUAL_ASSOCIATION_WORD
+    knowledge_base.ensure_indexed()
+```
+
+Stores the two secret values the referee needs at runtime — the actual opening sentence and the actual association word — as instance attributes. These are the ground truth used to answer player questions and score player guesses. Calls `ensure_indexed()` immediately so the ChromaDB knowledge base is populated before the first game starts. If the index already exists (flag file present), this is a no-op.
+
+---
+
+### `get_warmup_question`
+
+```python
+def get_warmup_question(self, ctx):
+    dynamic = ctx.get("dynamic", ctx)
+    return {"warmup_question":
+            "How many items can the average human hold in short-term memory?"}
+```
+
+Returns a fixed warmup question tied to the game strategy. The question references Miller's Law (the answer is ~7), which is the intellectual basis for the 150-line coding rule chosen as the paragraph. This primes sophisticated players to think about the right domain before the association word `"cognition"` is revealed. The context is unwrapped with `ctx.get("dynamic", ctx)` to handle both the SDK's wrapped format `{"dynamic": {...}}` and raw dict format — a pattern applied consistently across all 4 callbacks.
+
+---
+
+### `get_round_start_info`
+
+```python
+def get_round_start_info(self, ctx):
+    dynamic = ctx.get("dynamic", ctx)
+    return {"book_name": BOOK_NAME, "book_hint": BOOK_HINT,
+            "association_word": ASSOCIATION_WORD}
+```
+
+Returns the three pieces of information sent to players at the start of a round. All values come from `book_config.py` constants:
+
+- `book_name`: `"The Non-Arbitrary Line Limit"` — an invented title that describes Section 4.3 without giving it away
+- `book_hint`: A 13-word description referencing a "psychological research on human attention span boundaries" — points to Miller's Law without naming it
+- `association_word`: `"cognition"` — the broad domain word revealed to players. This is intentionally a wide hint; the secret scoring target is `"seven"` (which requires a player to reason from cognition → Miller's Law → 7 items → the number seven)
+
+This asymmetry between the revealed word and the secret word is the core scoring strategy: weak LLMs will guess generic words in the cognition domain and score 0 on the association component; sophisticated reasoning leads to `"seven"` and scores 100.
+
+---
+
+### `get_answers`
+
+```python
+def get_answers(self, ctx):
+    dynamic = ctx.get("dynamic", ctx)
+    questions = dynamic.get("questions", [])
+    answers = []
+    for q in questions:
+        answers.append({"question_number": q["question_number"],
+                        "answer": self._answer_question(q)})
+    return {"answers": answers}
+```
+
+Iterates over the player's 20 questions and answers each one individually (sequential, not batched). For each question, delegates to `_answer_question()`. Failures on individual questions never crash the loop — an error on question 5 still produces valid answers for questions 1-4 and 6-20.
+
+#### `_answer_question` (helper)
+
+```python
+def _answer_question(self, q):
+    context = knowledge_base.search(
+        f"150-line limit {q['question_text']}", n_results=2)
+    ctx_text = " ".join(r["content"] for r in context)
+    opts = q.get("options", {})
+    prompt = (
+        f'Answer based on this paragraph: "{self._opening_sentence}"\n'
+        f'Context: {ctx_text}\n\n'
+        f'Question: {q["question_text"]}\n'
+        f'A: {opts.get("A","")}  B: {opts.get("B","")}  '
+        f'C: {opts.get("C","")}  D: {opts.get("D","")}\n'
+        f'Reply only with A, B, C, D, or "Not Relevant".'
+    )
+    try:
+        text = gemini_client.generate(prompt)
+        for ch in text:
+            if ch in "ABCD":
+                return ch
+        return "Not Relevant"
+    except Exception:
+        return "Not Relevant"
+```
+
+**Step 1 — RAG retrieval:** Searches the ChromaDB knowledge base with a query combining the fixed anchor `"150-line limit"` and the question text. Returns up to 2 relevant passages from the MCP book chapters to use as context alongside the opening sentence.
+
+**Step 2 — Prompt construction:** Builds a prompt that gives Gemini the actual opening sentence (ground truth), the RAG context passages, the full question text, and all 4 answer options. By anchoring on the real opening sentence, the referee can answer accurately even if Gemini has no prior knowledge of the book.
+
+**Step 3 — Answer extraction:** Scans the response character by character for the first occurrence of `A`, `B`, `C`, or `D`. This is robust against Gemini prepending explanatory text (e.g., "The answer is B because..."). If no valid letter is found or Gemini raises an exception, returns `"Not Relevant"` as the safe fallback.
+
+---
+
+### `get_score_feedback`
+
+```python
+def get_score_feedback(self, ctx):
+    dynamic = ctx.get("dynamic", ctx)
+    guess = dynamic["player_guess"]
+    scores = gemini_client.generate_json(self._build_score_prompt(guess))
+    if not self._valid_scores(scores):
+        scores = self._fallback_scores(guess)
+    return self._build_response(scores)
+```
+
+Orchestrates scoring in three stages: build prompt → call Gemini → validate → fallback if needed → build response. The `player_guess` field is a nested `PlayerGuess` TypedDict inside the dynamic context (not a flat field), so it is accessed as `dynamic["player_guess"]`.
+
+#### `_build_score_prompt` (helper)
+
+Constructs an explicit multi-line prompt showing Gemini both the actual values (from instance state) and the player's guessed values side by side. Uses `<int 0-100>` placeholder syntax and the instruction `"Return ONLY valid JSON with exactly these keys"` to minimise the chance of the model returning schema strings literally or wrapping output in markdown. Requests 150-200 words per feedback field to meet the SDK's `FeedbackMessages` requirement.
+
+#### `_valid_scores` (helper)
+
+```python
+def _valid_scores(self, s):
+    required = ["opening_sentence_score", "sentence_justification_score",
+                "associative_word_score", "word_justification_score",
+                "opening_sentence_feedback", "associative_word_feedback"]
+    return all(k in s for k in required)
+```
+
+Checks that the parsed JSON contains all 6 required keys. Any missing key (e.g. Gemini returned a partial response or an empty dict `{}`) triggers the fallback path.
+
+#### `_fallback_scores` (helper)
+
+```python
+def _fallback_scores(self, guess):
+    sent = difflib.SequenceMatcher(
+        None, norm(self._opening_sentence),
+        norm(guess.get("opening_sentence", ""))).ratio() * 100
+    word = 100.0 if norm(self._actual_word) == norm(
+        guess.get("associative_word", "")) else 0.0
+    ...
+```
+
+Used only when Gemini fails to return valid JSON. Scores the two most important components deterministically:
+
+- **Opening sentence score**: `difflib.SequenceMatcher` ratio (0.0–1.0) × 100, comparing normalised (lowercase, stripped) actual vs guessed sentence. This gives a meaningful similarity score without needing an LLM.
+- **Association word score**: Exact match only — 100 if the normalised guessed word equals `"seven"`, 0 otherwise.
+- **Justification scores**: Both set to 0.0 since there is no LLM available to evaluate reasoning quality.
+- **Feedback strings**: 150-200 word fallback templates from `book_config.py` explaining the scoring methodology, meeting the SDK requirement even in the fallback path.
+
+#### `_build_response` (helper)
+
+```python
+def _build_response(self, s):
+    private = (s["opening_sentence_score"] * 0.5
+               + s["sentence_justification_score"] * 0.2
+               + s["associative_word_score"] * 0.2
+               + s["word_justification_score"] * 0.1)
+    return {
+        "league_points": self._score_to_league_points(private),
+        "private_score": round(private, 2),
+        "breakdown": {...},
+        "feedback": {...},
+    }
+```
+
+Applies the official weighted formula to compute `private_score` (0–100), then converts to `league_points` (0–3) using the SDK thresholds. Reshapes the flat scores dict into the nested `ScoreFeedbackResponse` structure the SDK expects: scores go into `breakdown`, feedback strings go into `feedback`.
+
+#### `_score_to_league_points` (helper)
+
+```python
+@staticmethod
+def _score_to_league_points(score):
+    if score >= 80: return 3
+    if score >= 60: return 2
+    if score >= 40: return 1
+    return 0
+```
+
+Converts the continuous private score to the discrete league points value. Thresholds (80/60/40) match the SDK's `ScoreFeedbackResponse` docstring exactly, which takes precedence over the book's different thresholds (85/70/50).
+
+---
+
+### RAG Knowledge Base (`knowledge_base.py`)
+
+```
+ensure_indexed() → get_knowledge() → _build_knowledge()
+search(query, n_results) → get_knowledge() → kb.search()
+```
+
+**`_build_knowledge()`** — Constructs an Agno `Knowledge` object backed by a local persistent `ChromaDb` instance. Uses `GeminiEmbedder` with `vertexai=False` so it authenticates via `GOOGLE_API_KEY` (not Vertex AI credentials). Collection name is `"mcp_book"`. ChromaDB path is configurable via `CHROMA_PATH` env var (default `tmp/chromadb`).
+
+**`get_knowledge()`** — Lazy singleton: builds the `Knowledge` object once on first call and caches it in the module-level `_knowledge` variable. Subsequent calls return the cached instance.
+
+**`ensure_indexed()`** — Idempotent indexing: checks for a `.indexed` flag file inside the ChromaDB path. If missing, calls `kb.insert(path=...)` to embed and store all markdown chapters from `COURSE_MATERIAL_PATH`. Creates the flag file on completion. If the course material directory doesn't exist (e.g. not yet downloaded), silently returns — this makes the referee start cleanly in any environment.
+
+**`search(query, n_results)`** — Calls `kb.search()` and maps results to `[{"content": str}]` dicts. Wraps everything in a try/except so any ChromaDB or embedder error returns `[]` instead of crashing the referee mid-game.
+
+---
+
+### Gemini Client (`gemini_client.py`)
+
+**`generate(prompt)`** — Sends a plain text prompt to the Gemini API and returns the response text. Model is read from the `GEMINI_MODEL` env var, defaulting to `gemini-3.1-flash-lite-preview`. The `_client` is instantiated once at module import time (eager init) using `GOOGLE_API_KEY`.
+
+**`generate_json(prompt)`** — Wraps `generate()` and passes the result to `_parse_json()`.
+
+**`_parse_json(text)`** — First tries to strip a markdown code fence (` ```json ... ``` ` or ` ``` ... ``` `) using a regex. Then attempts `json.loads()` on the cleaned text. Returns `{}` on any parse failure, so callers always get a dict and never a raw exception.
+
+---
+
+### Strategic Design Summary
+
+The implementation is built around one core idea: **choose a paragraph that is easy for the referee to answer accurately but hard for weak LLMs to guess**.
+
+Section 4.3 satisfies this because:
+1. The opening sentence is a concrete, unambiguous claim about a specific number
+2. The hint points to cognitive psychology research without naming it
+3. The revealed association word `"cognition"` is broad enough to be unhelpful to weak models
+4. The secret word `"seven"` requires a chain of reasoning: cognition → working memory → Miller's Law → 7 items → the number seven
+5. Weak LLMs playing as the player will guess words like `"memory"`, `"thinking"`, or `"focus"` — all scoring 0 on the association component (20% of total score)
