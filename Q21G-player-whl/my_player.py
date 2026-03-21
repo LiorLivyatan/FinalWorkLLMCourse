@@ -64,6 +64,44 @@ class MyPlayerAI(PlayerAI):
         match_id = ctx.get("service", {}).get("match_id", "unknown")
         print(f"Game {match_id} complete! Scored {points} points.")
 
+    def get_next_question(self, ctx: dict) -> dict:
+        history = ctx["dynamic"].get("history", [])
+        book_hint = ctx["dynamic"].get("book_hint", "")
+        hist_str = "\n".join(f"Q: {h['question']}  A: {h['answer']}" for h in history)
+        
+        prompt = f"""You are an AI playing 20-Questions to deduce a specific document ID.
+Hint: {book_hint}
+History of previous questions and answers:
+{hist_str}
+
+Ask the most strategic, orthogonal Yes/No question to eliminate candidates from the 3 possibilities.
+Reply with exactly ONE binary Yes/No question ending in a question mark.
+Do NOT output anything else.
+"""
+        response = generate(prompt).strip()
+        return {"question": response}
+
+    def get_final_guess(self, ctx: dict) -> dict:
+        history = ctx["dynamic"].get("history", [])
+        hist_str = "\n".join(f"Q: {h['question']}  A: {h['answer']}" for h in history)
+        
+        prompt = f"""You are the Guesser in a 20-Questions game.
+You must identify the single correct Document ID based on the history of questions and answers.
+History:
+{hist_str}
+
+The possible documents are:
+1 - The Non-Arbitrary Line Limit
+2 - System Design Principles
+3 - Gmail as Agent Transport
+
+Analyze the reasoning and output the best Document ID.
+Reply with ONLY valid JSON containing the numeric document_id key:
+{{"document_id": 2}}
+"""
+        result = generate_json(prompt)
+        return {"document_id": int(result.get("document_id", -1))}
+
 
 # ── Prompt builders ────────────────────────────────────────────
 
