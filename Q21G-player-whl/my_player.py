@@ -5,10 +5,18 @@ My Q21 Player Implementation.
 
 Uses Gemini for inference and ChromaDB-backed knowledge base
 for retrieving real opening sentences from course material.
+
+Strategy: HyDE RAG + Orthogonal Questions + CoT Deliberation.
 """
 from q21_player import PlayerAI
 from gemini_client import generate, generate_json
 from knowledge_base import ensure_indexed, search
+from prompts import (
+    build_questions_prompt,
+    build_hyde_prompt,
+    build_deliberation_prompt,
+    build_guess_prompt,
+)
 
 
 class MyPlayerAI(PlayerAI):
@@ -31,7 +39,7 @@ class MyPlayerAI(PlayerAI):
         book_hint = ctx["dynamic"].get("book_hint", "")
         association_word = ctx["dynamic"].get("association_word", "")
 
-        prompt = _build_questions_prompt(book_name, book_hint, association_word)
+        prompt = build_questions_prompt(book_name, book_hint, association_word)
         result = generate_json(prompt)
 
         questions = result.get("questions", [])
@@ -45,16 +53,40 @@ class MyPlayerAI(PlayerAI):
         association_word = ctx["dynamic"].get("association_word", "")
         answers = ctx["dynamic"]["answers"]
 
-        # Search knowledge base for candidate paragraphs
-        query = f"{book_name} {book_hint} {association_word}"
-        candidates = search(query, n_results=5)
-        candidates_text = "\n---\n".join(
-            c["content"] for c in candidates
+        # ── Step 1: HyDE — synthesize hypothetical paragraph ─────
+        hyde_prompt = build_hyde_prompt(
+            book_name, book_hint, association_word, answers,
+        )
+        hypothetical_text = generate(hyde_prompt)
+
+        # ── Step 2: RAG — search with both HyDE and original query
+        candidates_hyde = search(hypothetical_text, n_results=10)
+        candidates_orig = search(
+            f"{book_name} {book_hint} {association_word}", n_results=5,
         )
 
-        prompt = _build_guess_prompt(
-            book_name, book_hint, association_word,
-            answers, candidates_text,
+        # Deduplicate and merge
+        seen = set()
+        candidates = []
+        for c in candidates_hyde + candidates_orig:
+            key = c["content"][:100]
+            if key not in seen:
+                seen.add(key)
+                candidates.append(c)
+        candidates_text = "\n---\n".join(
+            c["content"] for c in candidates[:10]
+        )
+
+        # ── Step 3: CoT — deliberate on candidates ──────────────
+        delib_prompt = build_deliberation_prompt(
+            book_name, answers, candidates_text,
+        )
+        deliberation = generate_json(delib_prompt)
+        best_text = deliberation.get("best_paragraph_text", candidates_text)
+
+        # ── Step 4: Final guess from best candidate ──────────────
+        prompt = build_guess_prompt(
+            book_name, book_hint, association_word, answers, best_text,
         )
         result = generate_json(prompt)
         return _validate_guess(result)
@@ -65,62 +97,7 @@ class MyPlayerAI(PlayerAI):
         print(f"Game {match_id} complete! Scored {points} points.")
 
 
-# ── Prompt builders ────────────────────────────────────────────
-
-
-def _build_questions_prompt(
-    book_name: str, book_hint: str, association_word: str,
-) -> str:
-    # TODO: This is the strategic prompt — see note below.
-    return f"""You are playing a 21-questions game about a book's opening sentence.
-
-Book: "{book_name}"
-Hint: "{book_hint}"
-Association word: "{association_word}"
-
-Generate exactly 20 multiple-choice questions to identify the opening sentence.
-Structure your questions in 3 tiers:
-- Questions 1-7: Identify the CHAPTER or broad TOPIC area
-- Questions 8-14: Narrow down the PARAGRAPH theme and structure
-- Questions 15-20: Target SPECIFIC words, phrases, or sentence patterns
-
-Each question must have 4 options labeled A, B, C, D.
-
-Reply with ONLY valid JSON in this exact format:
-{{"questions": [
-  {{"question_number": 1, "question_text": "...", "options": {{"A": "...", "B": "...", "C": "...", "D": "..."}}}},
-  ...
-]}}"""
-
-
-def _build_guess_prompt(
-    book_name: str, book_hint: str, association_word: str,
-    answers: list[dict], candidates_text: str,
-) -> str:
-    answers_str = "\n".join(
-        f"Q{a['question_number']}: {a['answer']}" for a in answers
-    )
-    return f"""You are guessing a book's opening sentence based on Q&A clues.
-
-Book: "{book_name}"
-Hint: "{book_hint}"
-Association word: "{association_word}"
-
-Answers to your 20 questions:
-{answers_str}
-
-Candidate paragraphs from the course material:
-{candidates_text}
-
-Based on all evidence, identify the EXACT opening sentence from the
-candidates above. If none match perfectly, construct the best guess.
-
-Reply with ONLY valid JSON:
-{{"opening_sentence": "...",
-  "sentence_justification": "... (at least 35 words explaining your reasoning)",
-  "associative_word": "... (one word thematically related to the book)",
-  "word_justification": "... (at least 35 words explaining your word choice)",
-  "confidence": 0.75}}"""
+# ── Helpers ───────────────────────────────────────────────────────
 
 
 def _validate_guess(result: dict) -> dict:
