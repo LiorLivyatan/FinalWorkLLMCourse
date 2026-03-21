@@ -323,11 +323,11 @@ BOOK_HINT = (
     "research on human attention span boundaries"
 )
 
-# Domain word shown to players
-ASSOCIATION_WORD = "cognition"
+# Domain word shown to players: memory is a genuine category that contains "chunk"
+ASSOCIATION_WORD = "memory"
 
-# Secret word: Miller's Law — ~7 items in working memory → the 150-line rule
-ACTUAL_ASSOCIATION_WORD = "seven"
+# Secret word: Miller's Law — working memory operates via chunking → "chunk"
+ACTUAL_ASSOCIATION_WORD = "chunk"
 
 # Actual opening sentence of Section 4.3
 OPENING_SENTENCE = "The 150-line limit per file is not an arbitrary number."
@@ -591,8 +591,8 @@ def make_score_ctx(wrapped=True):
             "player_guess": {
                 "opening_sentence": "The 150-line limit is not arbitrary.",
                 "sentence_justification": "Based on Miller's Law.",
-                "associative_word": "seven",
-                "word_justification": "7 items in memory.",
+                "associative_word": "chunk",
+                "word_justification": "Memory processes information via chunking.",
                 "confidence": 0.9}}
     return {"dynamic": data, "service": {}} if wrapped else data
 
@@ -728,7 +728,7 @@ Uses Gemini (via gemini_client) for LLM inference and
 Agno RAG (via knowledge_base) for accurate question answering.
 
 Book: Section 4.3 of MCP Architecture book
-Strategy: Miller's Law (7 items) → association word "seven"
+Strategy: Miller's Law (chunking) → association word "chunk"
 """
 import difflib
 from typing import Any, Dict

@@ -66,7 +66,7 @@ def make_score_ctx(wrapped=True):
             "player_guess": {
                 "opening_sentence": "The 150-line limit is not arbitrary.",
                 "sentence_justification": "Based on Miller's Law.",
-                "associative_word": "seven",
-                "word_justification": "7 items in memory.",
+                "associative_word": "chunk",
+                "word_justification": "Memory processes information via chunking.",
                 "confidence": 0.9}}
     return {"dynamic": data, "service": {}} if wrapped else data

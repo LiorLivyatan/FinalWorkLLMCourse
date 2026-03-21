@@ -7,7 +7,7 @@ Uses Gemini (via gemini_client) for LLM inference and
 Agno RAG (via knowledge_base) for accurate question answering.
 
 Book: Section 4.3 of MCP Architecture book
-Strategy: Miller's Law (7 items) -> association word "seven"
+Strategy: Miller's Law (chunking) -> association word "chunk"
 """
 import difflib
 from typing import Any, Dict

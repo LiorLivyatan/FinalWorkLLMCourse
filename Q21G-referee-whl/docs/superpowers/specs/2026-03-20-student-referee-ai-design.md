@@ -19,9 +19,9 @@ Architecture book — chosen to maximize referee league score via strategic hint
   *player's* league score, not the referee's.
 - Optimal strategy: moderately difficult hint creating asymmetric player outcomes.
 - Chosen paragraph: §4.3 opening sentence — *"The 150-line limit per file is not an arbitrary number."*
-- Association word domain: `"cognition"` (shown to players).
-- Secret association word: `"seven"` (Miller's Law — the cognitive science basis for the 150-line rule).
-- Strong players who reason: cognition + code quality + why-150 → Miller's 7 items → will guess correctly.
+- Association word domain: `"memory"` (shown to players — a genuine category that contains "chunk").
+- Secret association word: `"chunk"` (Miller's Law — working memory operates via chunking; the 150-line rule is calibrated to one cognitive chunk).
+- Strong players who reason: memory → cognitive psychology → Miller's Law → chunking mechanism → will guess "chunk" correctly.
 
 ---
 
@@ -52,8 +52,8 @@ Each file must have `# Area: Student Callbacks` and `# PRD: docs/superpowers/spe
 # fixed strategic choice, not a runtime secret or credential.
 BOOK_NAME = "The Non-Arbitrary Line Limit"
 BOOK_HINT = "A coding constraint whose precise threshold mirrors psychological research on human attention span boundaries"
-ASSOCIATION_WORD = "cognition"          # domain shown to players
-ACTUAL_ASSOCIATION_WORD = "seven"       # secret word players must guess
+ASSOCIATION_WORD = "memory"             # domain shown to players
+ACTUAL_ASSOCIATION_WORD = "chunk"       # secret word players must guess
 OPENING_SENTENCE = "The 150-line limit per file is not an arbitrary number."
 ```
 
@@ -135,7 +135,7 @@ self._actual_word = ACTUAL_ASSOCIATION_WORD
   - Word truth: `self._actual_word`
   - Do NOT use `actual_opening_sentence` or `actual_associative_word` from the context —
     they are `Optional[str]` and may be `None`.
-  - Note: `dynamic["association_word"]` is the referee's own domain word ("cognition"),
+  - Note: `dynamic["association_word"]` is the referee's own domain word ("memory"),
     NOT the secret word and NOT the player's guess. The player's guess is in
     `dynamic["player_guess"]["associative_word"]`.
 - Single Gemini call requesting JSON scores (0-100 each).

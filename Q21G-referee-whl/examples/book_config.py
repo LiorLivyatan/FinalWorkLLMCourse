@@ -14,11 +14,11 @@ BOOK_HINT = (
     "research on human attention span boundaries"
 )
 
-# Domain word shown to players
-ASSOCIATION_WORD = "cognition"
+# Domain word shown to players: memory is a genuine category that contains "chunk"
+ASSOCIATION_WORD = "memory"
 
-# Secret word: Miller's Law — ~7 items in working memory → the 150-line rule
-ACTUAL_ASSOCIATION_WORD = "seven"
+# Secret word: Miller's Law — working memory operates via chunking → "chunk"
+ACTUAL_ASSOCIATION_WORD = "chunk"
 
 # Actual opening sentence of Section 4.3
 OPENING_SENTENCE = "The 150-line limit per file is not an arbitrary number."
@@ -38,8 +38,9 @@ FALLBACK_WORD_FEEDBACK = (
     "The associative word score was determined by exact match comparison between "
     "the player's guessed word and the actual association word chosen by the referee. "
     "An exact match yields full marks; any other word receives zero. The association "
-    "word is chosen to reflect a deep thematic or conceptual connection to the "
-    "source material. To improve, consider the broader intellectual domain suggested "
-    "by the book hint and the pattern of answers received, then select the single "
-    "word that best captures the underlying concept."
+    "word is grounded in Miller's Law: working memory processes information by grouping "
+    "items into meaningful units — a mechanism known as chunking. The 150-line file limit "
+    "is calibrated to the size of a cognitive chunk a developer can hold in working memory. "
+    "To improve, reason from the memory domain through cognitive psychology to the specific "
+    "mechanism that connects memory capacity to the paragraph's central claim."
 )

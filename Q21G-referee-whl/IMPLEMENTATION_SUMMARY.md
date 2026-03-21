@@ -7,8 +7,8 @@ The AI uses **Google Gemini** for inference and **Agno RAG + ChromaDB** for accu
 mirroring the structure of the player package (`Q21G-player-whl`).
 
 **Strategy:** Section 4.3 of the MCP Architecture book, exploiting Miller's Law (7 items in memory = 150-line rule)
-to create an asymmetric challenge where the association domain `"cognition"` is revealed to players
-but the secret scoring word is `"seven"`.
+to create an asymmetric challenge where the association domain `"memory"` is revealed to players
+but the secret scoring word is `"chunk"`.
 
 ---
 
@@ -21,8 +21,8 @@ Game constants for the chosen paragraph. Isolated here so all other modules impo
 |---|---|
 | `BOOK_NAME` | `"The Non-Arbitrary Line Limit"` |
 | `BOOK_HINT` | `"A coding constraint whose precise threshold mirrors psychological research on human attention span boundaries"` |
-| `ASSOCIATION_WORD` | `"cognition"` ← shown to players |
-| `ACTUAL_ASSOCIATION_WORD` | `"seven"` ← secret scoring target (Miller's Law) |
+| `ASSOCIATION_WORD` | `"memory"` ← shown to players |
+| `ACTUAL_ASSOCIATION_WORD` | `"chunk"` ← secret scoring target (Miller's Law chunking) |
 | `OPENING_SENTENCE` | `"The 150-line limit per file is not an arbitrary number."` |
 
 ---
@@ -66,7 +66,7 @@ Returns a fixed warmup question tied to the strategy:
 Primes players to think about Miller's Law before revealing the association word.
 
 #### Callback 2: `get_round_start_info`
-Returns the book name, hint, and `association_word = "cognition"` from `book_config`.
+Returns the book name, hint, and `association_word = "memory"` from `book_config`.
 
 #### Callback 3: `get_answers`
 Answers each of the player's 20 questions **sequentially** (one Gemini call per question):
@@ -235,7 +235,7 @@ def get_warmup_question(self, ctx):
             "How many items can the average human hold in short-term memory?"}
 ```
 
-Returns a fixed warmup question tied to the game strategy. The question references Miller's Law (the answer is ~7), which is the intellectual basis for the 150-line coding rule chosen as the paragraph. This primes sophisticated players to think about the right domain before the association word `"cognition"` is revealed. The context is unwrapped with `ctx.get("dynamic", ctx)` to handle both the SDK's wrapped format `{"dynamic": {...}}` and raw dict format — a pattern applied consistently across all 4 callbacks.
+Returns a fixed warmup question tied to the game strategy. The question references Miller's Law (the answer is ~7), which is the intellectual basis for the 150-line coding rule chosen as the paragraph. This primes sophisticated players to think about the memory/chunking domain before the association word `"memory"` is revealed. The context is unwrapped with `ctx.get("dynamic", ctx)` to handle both the SDK's wrapped format `{"dynamic": {...}}` and raw dict format — a pattern applied consistently across all 4 callbacks.
 
 ---
 
@@ -252,9 +252,9 @@ Returns the three pieces of information sent to players at the start of a round.
 
 - `book_name`: `"The Non-Arbitrary Line Limit"` — an invented title that describes Section 4.3 without giving it away
 - `book_hint`: A 13-word description referencing a "psychological research on human attention span boundaries" — points to Miller's Law without naming it
-- `association_word`: `"cognition"` — the broad domain word revealed to players. This is intentionally a wide hint; the secret scoring target is `"seven"` (which requires a player to reason from cognition → Miller's Law → 7 items → the number seven)
+- `association_word`: `"memory"` — a genuine domain/category that naturally contains `"chunk"`. Memory is shown to players as the revealed hint. The secret scoring target is `"chunk"` (which requires reasoning from memory → cognitive psychology → Miller's Law → the chunking mechanism → `"chunk"`)
 
-This asymmetry between the revealed word and the secret word is the core scoring strategy: weak LLMs will guess generic words in the cognition domain and score 0 on the association component; sophisticated reasoning leads to `"seven"` and scores 100.
+This asymmetry is the core scoring strategy: weak LLMs will guess words like `"recall"`, `"storage"`, `"cache"` — all plausible memory-domain words but none of them `"chunk"` — and score 0 on the association component. Sophisticated reasoning about working memory capacity leads directly to `"chunk"` and scores 100.
 
 ---
 
@@ -352,7 +352,7 @@ def _fallback_scores(self, guess):
 Used only when Gemini fails to return valid JSON. Scores the two most important components deterministically:
 
 - **Opening sentence score**: `difflib.SequenceMatcher` ratio (0.0–1.0) × 100, comparing normalised (lowercase, stripped) actual vs guessed sentence. This gives a meaningful similarity score without needing an LLM.
-- **Association word score**: Exact match only — 100 if the normalised guessed word equals `"seven"`, 0 otherwise.
+- **Association word score**: Exact match only — 100 if the normalised guessed word equals `"chunk"`, 0 otherwise.
 - **Justification scores**: Both set to 0.0 since there is no LLM available to evaluate reasoning quality.
 - **Feedback strings**: 150-200 word fallback templates from `book_config.py` explaining the scoring methodology, meeting the SDK requirement even in the fallback path.
 
@@ -423,6 +423,6 @@ The implementation is built around one core idea: **choose a paragraph that is e
 Section 4.3 satisfies this because:
 1. The opening sentence is a concrete, unambiguous claim about a specific number
 2. The hint points to cognitive psychology research without naming it
-3. The revealed association word `"cognition"` is broad enough to be unhelpful to weak models
-4. The secret word `"seven"` requires a chain of reasoning: cognition → working memory → Miller's Law → 7 items → the number seven
-5. Weak LLMs playing as the player will guess words like `"memory"`, `"thinking"`, or `"focus"` — all scoring 0 on the association component (20% of total score)
+3. The revealed association word `"memory"` is a genuine domain/category for `"chunk"` — making the pair fair and defensible under the rules
+4. The secret word `"chunk"` requires a chain of reasoning: memory → cognitive psychology → Miller's Law → the chunking mechanism
+5. Weak LLMs playing as the player will guess words like `"recall"`, `"storage"`, `"cache"`, or `"retention"` — all plausible memory-domain words but none of them `"chunk"` — scoring 0 on the association component (20% of total score)
