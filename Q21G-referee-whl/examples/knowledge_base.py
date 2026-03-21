@@ -33,7 +33,7 @@ def _build_knowledge() -> Knowledge:
             persistent_client=True,
             embedder=GeminiEmbedder(
                 id="gemini-embedding-2-preview",
-                vertexai=False,
+                vertexai=True,
             ),
         ),
     )
@@ -47,11 +47,17 @@ def get_knowledge() -> Knowledge:
 
 
 def ensure_indexed() -> None:
-    """Index MCP book chapters into ChromaDB if not already done."""
+    """Index MCP book chapters into ChromaDB if not already done.
+
+    Raises:
+        FileNotFoundError: If COURSE_MATERIAL_PATH doesn't exist.
+    """
     course_path = os.getenv("COURSE_MATERIAL_PATH", "../chapters_en")
     material_dir = Path(course_path)
     if not material_dir.exists():
-        return  # Skip silently if path not configured
+        raise FileNotFoundError(
+            f"Course material not found at: {material_dir.resolve()}"
+        )
 
     chroma_path = os.getenv("CHROMA_PATH", "tmp/chromadb")
     flag_file = Path(chroma_path) / ".indexed"
@@ -65,10 +71,15 @@ def ensure_indexed() -> None:
 
 
 def search(query: str, n_results: int = 3) -> list[dict]:
-    """Search the MCP book knowledge base. Returns [] on any error."""
-    try:
-        kb = get_knowledge()
-        documents = kb.search(query, max_results=n_results)
-        return [{"content": doc.content} for doc in documents]
-    except Exception:
-        return []
+    """Search the MCP book knowledge base.
+
+    Args:
+        query: Natural language search query.
+        n_results: Maximum number of results to return.
+
+    Returns:
+        List of dicts with 'content' key containing matched text.
+    """
+    kb = get_knowledge()
+    documents = kb.search(query, max_results=n_results)
+    return [{"content": doc.content} for doc in documents]
