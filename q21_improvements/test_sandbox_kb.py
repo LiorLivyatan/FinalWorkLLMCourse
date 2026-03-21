@@ -1,10 +1,6 @@
 # Area: Data Engineering — Sandbox Knowledge Base Test
-"""
-Compare RAG search quality: broken (Agno/pypdf) vs fixed (PyMuPDF) indexing.
-
-Extracts text from course PDFs using PyMuPDF (correct RTL Hebrew),
-indexes into a sandbox ChromaDB collection, then runs identical
-queries against both collections to compare result quality.
+# PRD: q21_improvements/improvement_plan.md
+"""Compare RAG quality: broken (Agno/pypdf) vs fixed (PyMuPDF) indexing.
 
 Usage:  python q21_improvements/test_sandbox_kb.py
 """

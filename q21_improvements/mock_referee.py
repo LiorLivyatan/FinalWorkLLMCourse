@@ -1,4 +1,5 @@
 # Area: Q21 Eval Pipeline
+# PRD: q21_improvements/improvement_plan.md
 """
 Fast, RAG-connected mock referee for offline simulation.
 Answers questions by querying the knowledge_base for chunks

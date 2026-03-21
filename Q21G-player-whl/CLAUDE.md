@@ -47,6 +47,9 @@ Q21G-player-whl/
 ├── .env.example                 # Environment variables template
 │
 ├── my_player.py                 # Student implementation (PUBLIC)
+├── prompts.py                   # Prompt builders (HyDE, orthogonal, CoT, guess)
+├── pdf_reader_fixed.py          # PyMuPDF PDF reader (correct RTL Hebrew)
+├── reindex_kb.py                # Re-index KB with PyMuPDF + GeminiEmbedder
 ├── run.py                       # CLI entry point
 ├── setup.py                     # Unified setup wizard
 ├── setup_gmail.py               # Gmail OAuth setup

@@ -28,6 +28,7 @@ from agno.knowledge.embedder.google import GeminiEmbedder
 
 from pdf_reader_fixed import extract_and_chunk_pdfs
 
+# Defaults assume running from project root (where .env has CHROMA_PATH=./database)
 CHROMA_PATH = os.getenv("CHROMA_PATH", "./database")
 COURSE_PATH = os.getenv("COURSE_MATERIAL_PATH", "./course-material")
 COLLECTION = "course_material"

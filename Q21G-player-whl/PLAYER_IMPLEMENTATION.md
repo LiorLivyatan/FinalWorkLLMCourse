@@ -67,9 +67,12 @@ Logs the score. No action needed.
 
 | File | Purpose |
 |------|---------|
-| `my_player.py` | 4 PlayerAI callbacks + prompt builders |
+| `my_player.py` | 4 PlayerAI callbacks (HyDE + CoT pipeline) |
+| `prompts.py` | Prompt builders: orthogonal questions, HyDE, deliberation, guess |
 | `gemini_client.py` | `generate()` and `generate_json()` wrappers |
 | `knowledge_base.py` | ChromaDB singleton, indexing, search |
+| `pdf_reader_fixed.py` | PyMuPDF PDF reader (correct RTL Hebrew extraction) |
+| `reindex_kb.py` | Re-index KB: PyMuPDF + GeminiEmbedder (run from project root) |
 | `test_agno_agent.py` | Agno Agent + RAG interactive test |
 | `test_e2e_game.py` | Full game simulation via GameExecutor |
 

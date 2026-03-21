@@ -1,4 +1,5 @@
-# Area: Data Engineering
+# Area: Data Engineering — PDF RTL Validation
+# PRD: q21_improvements/improvement_plan.md
 import sys
 import fitz
 from bidi.algorithm import get_display
