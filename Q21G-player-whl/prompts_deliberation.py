@@ -46,6 +46,35 @@ Reply with ONLY valid JSON:
 "best_paragraph_text": "... (copy the FULL text of the best candidate AS-IS)"}}"""
 
 
+def build_council_prompt(
+    candidates: list[dict], enriched_answers: list[dict],
+) -> str:
+    """Council deliberation prompt for comparing 2-3 candidates."""
+    answers_str = "\n".join(format_answer(a) for a in enriched_answers)
+    cands_str = "\n\n---\n\n".join(
+        f"Candidate {i}:\n{c['content']}"
+        for i, c in enumerate(candidates)
+    )
+    return f"""You are one member of a deliberation council. Compare these
+candidate paragraphs and determine which is the target paragraph.
+
+Evidence from 20 Q&A questions:
+{answers_str}
+
+Candidates:
+{cands_str}
+
+For each candidate evaluate:
+1. Does the FORMAT match the Q&A evidence? (list vs prose vs code)
+2. Does the CONTENT match the Q&A evidence? (topic, entities, domain)
+3. Does it contain the structural features the answers describe?
+
+Pick the single best match. Score your confidence 1-10 (10 = certain).
+
+Reply with ONLY valid JSON:
+{{"best_candidate_index": 0, "confidence": 8, "reasoning": "..."}}"""
+
+
 def build_guess_prompt(
     book_name: str, book_hint: str, association_word: str,
     answers: list[dict], candidates_text: str,
