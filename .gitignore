@@ -17,8 +17,7 @@ __pycache__/
 logs/
 *.sqlite3
 
-# ChromaDB
-database/
+# ChromaDB flag file
 .indexed
 
 # Eval workspace & debug logs
