@@ -134,7 +134,7 @@ Two models deliberate independently on the 2-3 surviving candidates. Each receiv
 |------|----------|---------|-----|
 | Primary | `gpt-5.4-2026-03-05` | `OPENAI_MODEL` | Strong reasoning, current default |
 | Secondary | `gemini-2.5-pro-preview-05-06` | `GEMINI_COUNCIL_MODEL` | Different training data, different biases |
-| Filter (cheap) | `gemini-2.0-flash` | `GEMINI_FILTER_MODEL` | Fast, cheap — rule enforcement only |
+| Filter (cheap) | `gemini-3.1-flash-lite-preview` | `GEMINI_FILTER_MODEL` | Fast, cheap — already used by referee, rule enforcement only |
 
 Models are configurable via environment variables. The Gemini council call reuses the existing `gemini_client.py` module (with model override parameter) rather than creating a new file.
 
