@@ -117,7 +117,7 @@ This is not deep reasoning — it's rule enforcement. A cheap model does this re
 
 New file: `Q21G-player-whl/candidate_filter.py`
 - `deterministic_filter(candidates, enriched_answers) → filtered_candidates`
-- `llm_elimination(candidates, enriched_answers) → filtered_candidates`
+- `llm_filter(candidates, enriched_answers) → filtered_candidates`
 
 ## Phase 3: Two-Model Council
 
