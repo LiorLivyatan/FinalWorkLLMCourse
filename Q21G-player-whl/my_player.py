@@ -8,9 +8,10 @@ from prompts import (
     build_questions_prompt,
     build_hyde_prompt,
     build_mp_hyde_prompt,
-    build_deliberation_prompt,
     build_guess_prompt,
 )
+from candidate_filter import deterministic_filter, llm_filter
+from council import council_deliberate
 from player_helpers import validate_guess, fallback_questions
 
 try:
@@ -108,26 +109,29 @@ class MyPlayerAI(PlayerAI):
                 seen.add(key)
                 candidates.append(c)
 
-        # Top 10 uniqueness check
         top_candidates = candidates[:10]
-        candidates_text = "\n---\n".join(c["content"] for c in top_candidates)
-
         if self.logger:
             self.logger.log_phase("phase4_candidates",
                 [{"content": c["content"][:150] + "..."} for c in top_candidates])
 
-        # ── Step 3: CoT — deliberate on candidates ──────────────
-        delib_prompt = build_deliberation_prompt(
-            book_name, answers, candidates_text,
-        )
-        deliberation = generate_json(delib_prompt)
+        # ── Step 3: Hybrid Filter ─────────────────────────────────
+        filtered = deterministic_filter(top_candidates, enriched)
+        filtered = llm_filter(filtered, enriched)
 
         if self.logger:
-            self.logger.log_phase("phase5_deliberation", deliberation)
+            self.logger.log_phase("phase5_filter", [
+                {"content": c["content"][:150] + "..."} for c in filtered
+            ])
 
-        best_text = deliberation.get("best_paragraph_text", candidates_text)
+        # ── Step 4: Two-Model Council ─────────────────────────────
+        council_result = council_deliberate(filtered, enriched)
 
-        # ── Step 4: Final guess from best candidate ──────────────
+        if self.logger:
+            self.logger.log_phase("phase6_council", council_result)
+
+        best_text = council_result.get("best_paragraph_text", "")
+
+        # ── Step 5: Final guess from best candidate ───────────────
         prompt = build_guess_prompt(
             book_name, book_hint, association_word, answers, best_text,
         )
