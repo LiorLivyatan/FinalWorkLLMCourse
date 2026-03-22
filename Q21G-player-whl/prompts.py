@@ -80,6 +80,37 @@ software architecture, and the Q21 League game project.
 Write ONLY the Hebrew paragraph, nothing else."""
 
 
+def build_mp_hyde_prompt(
+    book_name: str, book_hint: str, association_word: str,
+    answers: list[dict],
+) -> str:
+    """Analyze the answers and generate 3 distinct Hebrew hypothetical paragraphs (MP-HyDE)."""
+    answers_str = "\n".join(_format_answer(a) for a in answers)
+    return f"""Based on a 21-questions game about a Hebrew textbook, synthesize exactly 3 hypothetical paragraphs IN HEBREW that match all these clues.
+
+Book: "{book_name}"
+Hint: "{book_hint}"
+Association word: "{association_word}"
+
+Question-Answer pairs:
+{answers_str}
+
+Write 3 distinct 100-150 word paragraphs IN HEBREW (עברית). Each must imitate the EXACT academic, structured, formatting and vocabulary style of a university textbook.
+- Paragraph 1: An academic conceptual overview or chapter introduction.
+- Paragraph 2: A deeply granular, technical breakdown or process description.
+- Paragraph 3: A strict rule definition, system limitation, or architecture description.
+
+Use technical terminology matching the clues. Be specific and concrete.
+
+Reply with ONLY valid JSON:
+{{"paragraphs": [
+  "Hebrew paragraph 1...",
+  "Hebrew paragraph 2...",
+  "Hebrew paragraph 3..."
+]}}"""
+
+
+
 def build_deliberation_prompt(
     book_name: str, answers: list[dict], candidates_text: str,
 ) -> str:
@@ -131,10 +162,8 @@ Best matching paragraph(s) — may be in Hebrew:
 
 INSTRUCTIONS:
 1. Find the VERY FIRST SENTENCE of the best matching paragraph.
-2. If the paragraph is in Hebrew, TRANSLATE that first sentence to English.
-   The opening_sentence in your response must be in ENGLISH.
-3. Do NOT copy section numbers, table headers, or labels — only the first
-   actual content sentence.
+2. DO NOT translate the sentence. Extract the exact verbatim Hebrew string from the source text. The "opening_sentence" in your JSON response must be the original authentic Hebrew.
+3. Do NOT copy section numbers, table headers, or labels — only the first actual content sentence.
 4. For "associative_word": what HIDDEN CONCEPT connects "{association_word}"
    to the paragraph's core thesis? This is NOT "{association_word}" itself.
    Think about the underlying mechanism or principle.

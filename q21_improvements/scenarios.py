@@ -2,59 +2,58 @@
 # PRD: q21_improvements/improvement_plan.md
 """
 Ground-truth game scenarios for offline simulation.
-
-All opening sentences are sourced from the Q21G League course booklet.
-Scenario 1 is our referee's actual league paragraph.
+All opening sentences are authentic verbatim Hebrew strings sourced directly 
+from the Q21G League course booklet via PyMuPDF extraction.
 """
 
-# ── Scenario 1: Our referee's chosen paragraph (Primary) ────────
 SCENARIO_1 = {
     "name": "The Non-Arbitrary Line Limit",
-    "book_name": "The Non-Arbitrary Line Limit",
-    "book_hint": (
-        "A coding constraint whose precise threshold mirrors psychological "
-        "research on human attention span boundaries"
-    ),
+    "book_name": "Q21G League Final Project",
+    "book_hint": "A coding constraint whose precise threshold mirrors psychological research on human attention span boundaries",
     "association_word": "memory",
     "actual_association_word": "chunk",
-    "opening_sentence": (
-        "The 150-line limit per file is not an arbitrary number."
-    ),
+    "opening_sentence": "מגבלת150שורות לקובץ היא לא מספר שרירותי.",
     "warmup_answer": "7",
 }
 
-# ── Scenario 2: Guiding Design Principles (Harder) ───────────────
 SCENARIO_2 = {
-    "name": "System Design Principles",
+    "name": "Prompt Engineering Principles",
     "book_name": "Q21G League Final Project",
-    "book_hint": (
-        "A multi-agent design separating tournament management from game "
-        "refereeing to allow language-independent player implementations"
-    ),
-    "association_word": "protocol",
-    "actual_association_word": "separation",
-    "opening_sentence": (
-        "The system was designed according to several guiding principles:"
-    ),
+    "book_hint": "A systemic method involving three core principles: atomicity, scientific comparison, and structured formatting.",
+    "association_word": "rules",
+    "actual_association_word": "atom",
+    "opening_sentence": "פרק זה הציג שיטה מערכתית לתכנון פרומפטים. שלושה עקרונות מרכזיים:",
     "warmup_answer": "7",
 }
 
-# ── Scenario 3: Gmail as Transport Layer (Contrasting domain) ─────
 SCENARIO_3 = {
-    "name": "Gmail as Agent Transport",
+    "name": "Gmail API Constraints",
     "book_name": "Q21G League Final Project",
-    "book_hint": (
-        "An unconventional transport layer choice that trades raw speed "
-        "for built-in reliability, human-readable debugging, and zero "
-        "server infrastructure requirements"
-    ),
-    "association_word": "inbox",
-    "actual_association_word": "asynchronous",
-    "opening_sentence": (
-        "Unlike traditional architectures that use HTTP servers, the league "
-        "system uses the Gmail API as its transport layer."
-    ),
+    "book_hint": "Constraints on the free tier of the async transport layer, capping daily message volume to prevent abuse.",
+    "association_word": "limits",
+    "actual_association_word": "quota",
+    "opening_sentence": "חשוב להכיר את מגבלותGmail APIלפני המימוש: חשבון חינמי מוגבל ל-",
     "warmup_answer": "7",
 }
 
-ALL_SCENARIOS = [SCENARIO_1, SCENARIO_2, SCENARIO_3]
+SCENARIO_4 = {
+    "name": "Agent Interaction Patterns",
+    "book_name": "Q21G League Final Project",
+    "book_hint": "A flow diagram or section outlining how distinct entities — League Manager, Log Server, Referee, and Players — communicate.",
+    "association_word": "diagram",
+    "actual_association_word": "audit",
+    "opening_sentence": "איור5מציג את התקשורת בין הסוכנים.",
+    "warmup_answer": "7",
+}
+
+SCENARIO_5 = {
+    "name": "Model Context Protocol",
+    "book_name": "AI Agents with Model Context Protocol",
+    "book_hint": "A standard communication protocol developed by Anthropic to create a uniform interface between AI agents and external tools.",
+    "association_word": "standard",
+    "actual_association_word": "interface",
+    "opening_sentence": "MCPהוא פרוטוקול תקשורת שפותח על ידיAnthropicבמטרה ליצור ממשק אחיד בין",
+    "warmup_answer": "7",
+}
+
+ALL_SCENARIOS = [SCENARIO_1, SCENARIO_2, SCENARIO_3, SCENARIO_4, SCENARIO_5]
