@@ -15,7 +15,6 @@ __pycache__/
 
 # Runtime artifacts
 logs/
-*.sqlite3
 
 # ChromaDB flag file
 .indexed
@@ -24,6 +23,12 @@ logs/
 q21-eval-pipeline-workspace/
 q21_improvements/debug_logs/
 q21_improvements/eval_results.json
+
+# Tournament-sensitive — ground truth scenarios & results
+q21_improvements/scenarios.py
+q21_improvements/baseline_results.txt
+q21_improvements/fixed_kb_results.txt
+q21_improvements/expert_brainstorming_insights.md
 
 # Build artifacts
 dist/

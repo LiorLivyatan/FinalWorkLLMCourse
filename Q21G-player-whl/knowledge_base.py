@@ -3,10 +3,12 @@
 """RAG knowledge base over course material PDFs.
 
 Uses Agno's Knowledge + ChromaDB (local, persistent) + GeminiEmbedder.
-PDFs are indexed once on first run; subsequent runs reuse the index.
+The database ships pre-built (via reindex_kb.py with PyMuPDF for correct
+RTL Hebrew). If .indexed flag is missing, falls back to Agno's PDFReader
+(WARNING: this produces broken Hebrew — use reindex_kb.py instead).
 
 Environment variables:
-    CHROMA_PATH          - ChromaDB storage path (default: database)
+    CHROMA_PATH          - ChromaDB storage path (default: ../database)
     COURSE_MATERIAL_PATH - Directory containing the 22 course PDFs
     GOOGLE_API_KEY       - Required by GeminiEmbedder
 """
@@ -49,27 +51,29 @@ def get_knowledge() -> Knowledge:
 
 
 def ensure_indexed() -> None:
-    """Index course material PDFs into ChromaDB if not already done.
+    """Verify the ChromaDB index exists, or build it from course PDFs.
 
-    Uses a flag file (.indexed) inside the ChromaDB directory to
-    avoid re-indexing on every startup.
+    Checks the .indexed flag file first — if present, the pre-built
+    database is available and no course material path is needed.
+    Only requires COURSE_MATERIAL_PATH when building from scratch.
 
-    Raises:
-        FileNotFoundError: If COURSE_MATERIAL_PATH doesn't exist.
+    WARNING: Building from scratch uses Agno's PDFReader (broken RTL).
+    Use reindex_kb.py (PyMuPDF) for correct Hebrew indexing instead.
     """
-    course_path = os.getenv("COURSE_MATERIAL_PATH", "../course-material")
-    material_dir = Path(course_path)
-
-    if not material_dir.exists():
-        raise FileNotFoundError(
-            f"Course material not found at: {material_dir.resolve()}"
-        )
-
     chroma_path = os.getenv("CHROMA_PATH", "../database")
     flag_file = Path(chroma_path) / ".indexed"
 
     if flag_file.exists():
         return
+
+    course_path = os.getenv("COURSE_MATERIAL_PATH", "../course-material")
+    material_dir = Path(course_path)
+
+    if not material_dir.exists():
+        raise FileNotFoundError(
+            f"Course material not found at: {material_dir.resolve()}\n"
+            f"Either set COURSE_MATERIAL_PATH or run reindex_kb.py"
+        )
 
     kb = get_knowledge()
     kb.insert(path=str(material_dir))

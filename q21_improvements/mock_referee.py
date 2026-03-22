@@ -75,11 +75,13 @@ class MockReferee:
         guessed_word = guess.get("associative_word", "").lower().strip()
         word_score = 100.0 if actual_word == guessed_word else 0.0
 
+        # Justifications get full credit in simulation (real referee uses
+        # LLM to score them — we can't self-evaluate justification quality)
         private = (
             sentence_score * 0.5
-            + 100.0 * 0.2        # Fix: Default justification credit set to 100
+            + 100.0 * 0.2        # sentence_justification (assumed full)
             + word_score * 0.2
-            + 100.0 * 0.1        # Fix: Default justification credit set to 100
+            + 100.0 * 0.1        # word_justification (assumed full)
         )
         return {
             "opening_sentence_score": round(sentence_score, 2),

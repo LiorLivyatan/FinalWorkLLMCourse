@@ -1,32 +1,40 @@
-import os
+# Area: Player AI - LLM Client
+# PRD: docs/prd-player-ai.md
+"""Thin wrapper around OpenAI SDK for text generation.
+
+Uses OPENAI_API_KEY (auto-detected by SDK) and OPENAI_MODEL env var.
+Exposes two functions: generate() for raw text, generate_json() for
+parsed JSON responses with structured output.
+"""
 import json
+import os
+
 from openai import OpenAI
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv(usecwd=True))
 
-# Initialize the OpenAI client
-# It will automatically look for OPENAI_API_KEY in the environment
-client = OpenAI()
+_client = OpenAI()
+_DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 
-def generate(prompt: str, model: str = "gpt-5.4-2026-03-05") -> str:
-    """Standard text generation call."""
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}]
+
+def generate(prompt: str) -> str:
+    """Generate text from a prompt."""
+    response = _client.chat.completions.create(
+        model=_DEFAULT_MODEL,
+        messages=[{"role": "user", "content": prompt}],
     )
     return response.choices[0].message.content
 
-def generate_json(prompt: str, model: str = "gpt-5.4-2026-03-05") -> dict:
-    """JSON-enforced generation call."""
-    response = client.chat.completions.create(
-        model=model,
+
+def generate_json(prompt: str) -> dict:
+    """Generate a JSON response from a prompt."""
+    response = _client.chat.completions.create(
+        model=_DEFAULT_MODEL,
         messages=[{"role": "user", "content": prompt}],
-        response_format={"type": "json_object"}
+        response_format={"type": "json_object"},
     )
-    content = response.choices[0].message.content
     try:
-        return json.loads(content)
-    except json.JSONDecodeError:
-        print("Failed to decode JSON from OpenAI response.")
+        return json.loads(response.choices[0].message.content)
+    except (json.JSONDecodeError, TypeError):
         return {}

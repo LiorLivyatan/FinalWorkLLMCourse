@@ -11,7 +11,6 @@ Strategy: HyDE RAG + Orthogonal Questions + CoT Deliberation.
 from q21_player import PlayerAI
 from openai_client import generate, generate_json
 from knowledge_base import ensure_indexed, search
-from q21_improvements.phase_logger import PhaseLogger
 from prompts import (
     build_questions_prompt,
     build_hyde_prompt,
@@ -19,6 +18,11 @@ from prompts import (
     build_deliberation_prompt,
     build_guess_prompt,
 )
+
+try:
+    from q21_improvements.phase_logger import PhaseLogger
+except ImportError:
+    from phase_logger import PhaseLogger
 
 
 class MyPlayerAI(PlayerAI):
