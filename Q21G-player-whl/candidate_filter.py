@@ -1,35 +1,33 @@
 # Area: Player AI - Candidate Filter
 # PRD: docs/superpowers/specs/2026-03-23-deliberation-improvements-design.md
-"""Deterministic pre-filter for RAG candidates based on hard Q&A constraints.
+"""Deterministic pre-filter and LLM elimination round for RAG candidates.
 
 Eliminates candidates that violate structural rules implied by the question's
 correct answer option.  Always preserves at least one candidate (safety guard).
 """
+import os
 import re
+
+from prompts import format_answer
+from gemini_client import generate_json as gemini_json
+
+_DEFAULT_FILTER_MODEL = "gemini-3.1-flash-lite-preview"
 
 # ---------------------------------------------------------------------------
 # Low-level signal detectors
 # ---------------------------------------------------------------------------
 
 def _has_numbers(text: str) -> bool:
-    """True when text contains a sequence of 2+ digits."""
     return bool(re.search(r'\d{2,}', text))
 
-
 def _has_list_markers(text: str) -> bool:
-    """True when text contains bullet / numbered-list markers."""
     return bool(re.search(r'^\s*[\d•\-\*]', text, re.MULTILINE))
 
-
 def _has_code(text: str) -> bool:
-    """True when text contains Python / code keywords."""
     return bool(re.search(r'(def |class |import |for |if |return )', text))
 
-
 def _has_figure_ref(text: str) -> bool:
-    """True when text references a figure (Hebrew or English)."""
     return 'איור' in text or 'figure' in text.lower()
-
 
 # ---------------------------------------------------------------------------
 # Keyword → check mapping
@@ -49,56 +47,78 @@ _KEYWORD_CHECKS = {
 }
 
 # ---------------------------------------------------------------------------
-# Public API
+# Public API — deterministic filter
 # ---------------------------------------------------------------------------
 
 def deterministic_filter(candidates: list, enriched_questions: list) -> list:
-    """Remove candidates that violate hard constraints derived from enriched_questions.
+    """Remove candidates that violate hard constraints from enriched_questions.
 
-    Args:
-        candidates: List of RAG candidate dicts, each with a 'content' key.
-        enriched_questions: List of question dicts with keys:
-            - answer (str): selected answer letter, e.g. "B"
-            - options (dict): mapping of letter -> option text
-            - question_text (str)
-
-    Returns:
-        Filtered list of candidates.  Never empty — falls back to the full
-        input list if all candidates would be removed.
+    Never returns empty — falls back to the full input list.
     """
     checks = _build_checks(enriched_questions)
     if not checks:
         return candidates
-
     filtered = [c for c in candidates if _passes_all(c['content'], checks)]
-
-    # Safety guard: never return an empty list
     return filtered if filtered else candidates
-
 
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 
 def _build_checks(enriched_questions: list) -> list:
-    """Derive a list of check functions from the selected answer options.
-
-    Skips questions whose answer is "D" or "Not Relevant".
-    """
+    """Derive check functions from the selected answer options."""
     checks = []
     for q in enriched_questions:
         answer = q.get('answer', '')
         if answer in ('D', 'Not Relevant'):
             continue
-        options = q.get('options', {})
-        option_text = options.get(answer, '').lower()
+        option_text = q.get('options', {}).get(answer, '').lower()
         for keyword, fn in _KEYWORD_CHECKS.items():
             if keyword in option_text:
                 checks.append(fn)
-                break  # one check per question is enough
+                break
     return checks
 
-
 def _passes_all(text: str, checks: list) -> bool:
-    """Return True only when text satisfies every check."""
     return all(fn(text) for fn in checks)
+
+# ---------------------------------------------------------------------------
+# LLM elimination round
+# ---------------------------------------------------------------------------
+
+def _build_filter_prompt(candidates: list, enriched: list) -> str:
+    """Build a constraint-enforcement prompt for the LLM filter round."""
+    qa_lines = "\n".join(format_answer(a) for a in enriched)
+    cand_lines = "\n\n".join(
+        f"Candidate {i}:\n{c['content']}" for i, c in enumerate(candidates)
+    )
+    return (
+        "You are a strict constraint checker for a 21-questions RAG system.\n\n"
+        "Q&A constraints that MUST be satisfied by the correct candidate:\n"
+        f"{qa_lines}\n\n"
+        "Candidates (may be in Hebrew):\n"
+        f"{cand_lines}\n\n"
+        "Remove any candidate that clearly violates the constraints above.\n"
+        "Reply with ONLY valid JSON:\n"
+        '{"surviving_indices": [0, 1, ...]}'
+    )
+
+
+def llm_filter(candidates: list, enriched_answers: list) -> list:
+    """Call Gemini Flash to eliminate candidates that violate Q&A constraints.
+
+    Skips when ≤3 candidates. Never returns empty — falls back to full list.
+    """
+    if len(candidates) <= 3:
+        return candidates
+
+    prompt = _build_filter_prompt(candidates, enriched_answers)
+    model = os.getenv("GEMINI_FILTER_MODEL", _DEFAULT_FILTER_MODEL)
+    result = gemini_json(prompt, model=model)
+
+    indices = result.get("surviving_indices", [])
+    if not indices:
+        return candidates
+
+    filtered = [candidates[i] for i in indices if 0 <= i < len(candidates)]
+    return filtered if filtered else candidates
