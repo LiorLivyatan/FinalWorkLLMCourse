@@ -6,7 +6,13 @@
 def build_questions_prompt(
     book_name: str, book_hint: str, association_word: str,
 ) -> str:
-    """Adaptive orthogonal question prompt (20 questions)."""
+    """Orthogonal 4-block question prompt (20 questions).
+
+    Uses a fixed block structure that produces rich, discriminating
+    questions. Adaptive allocation was tested but degraded question
+    quality — the LLM generated shallow yes/no questions instead of
+    detailed analytical ones.
+    """
     return f"""You are playing a 21-questions game. Generate exactly 20
 multiple-choice questions to identify a specific opening sentence.
 
@@ -14,25 +20,16 @@ Book: "{book_name}"
 Hint: "{book_hint}"
 Association word: "{association_word}"
 
-STEP 1 — ANALYZE THE HINT:
-Read the hint carefully. Which dimensions does it already reveal?
-- If the hint tells you the DOMAIN → ask fewer domain questions
-- If the hint tells you STRUCTURAL features → ask fewer structure questions
-- Allocate MORE questions to unknown dimensions
-
-STEP 2 — GENERATE 20 QUESTIONS across these 4 blocks:
-(Adjust the count per block based on Step 1. Total MUST be exactly 20.)
-
-FORMATTING & TONE: academic, list, definition, code, etc.
-STRUCTURAL: process, comparison, architecture, rule, numbers, thresholds
-DOMAIN & ENTITIES: software, cognitive science, protocols, agents, databases
-GRANULAR CONTENT: thesis statement, references, figures, metaphors
-
 CRITICAL RULES:
 1. Questions must be ORTHOGONAL — each block covers a DIFFERENT dimension.
 2. Option D must ALWAYS be: "None of these apply"
 3. Options A-C must be specific and concrete, never vague.
 4. Focus on narrowing WHICH PARAGRAPH, not which book.
+
+Q1-Q5: FORMATTING & TONE (academic, list, definition, code, etc.)
+Q6-Q10: STRUCTURAL (process, comparison, architecture, rule, numbers)
+Q11-Q15: DOMAIN & ENTITIES (software, cognitive science, protocols, agents)
+Q16-Q20: GRANULAR (thesis statement, references, metaphors, examples)
 
 Reply with ONLY valid JSON:
 {{"questions": [
