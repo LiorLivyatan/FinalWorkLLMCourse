@@ -121,9 +121,9 @@ def _build_filter_prompt(candidates: list, enriched: list) -> str:
 def llm_filter(candidates: list, enriched_answers: list) -> list:
     """Call Gemini Flash to eliminate candidates that violate Q&A constraints.
 
-    Skips when ≤3 candidates. Never returns empty — falls back to full list.
+    Skips when ≤ MIN_SURVIVORS. Guarantees at least MIN_SURVIVORS returned.
     """
-    if len(candidates) <= 3:
+    if len(candidates) <= MIN_SURVIVORS:
         return candidates
 
     prompt = _build_filter_prompt(candidates, enriched_answers)
@@ -135,4 +135,15 @@ def llm_filter(candidates: list, enriched_answers: list) -> list:
         return candidates
 
     filtered = [candidates[i] for i in indices if 0 <= i < len(candidates)]
-    return filtered if filtered else candidates
+    if not filtered:
+        return candidates
+    # Guarantee MIN_SURVIVORS — backfill from original order if needed
+    if len(filtered) < MIN_SURVIVORS:
+        seen = set(id(c) for c in filtered)
+        for c in candidates:
+            if id(c) not in seen:
+                filtered.append(c)
+                seen.add(id(c))
+            if len(filtered) >= MIN_SURVIVORS:
+                break
+    return filtered
