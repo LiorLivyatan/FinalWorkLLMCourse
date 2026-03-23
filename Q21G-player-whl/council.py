@@ -15,7 +15,7 @@ try:
 except ImportError:
     build_council_prompt = None  # type: ignore[assignment]
 
-_DEFAULT_COUNCIL_MODEL = "gemini-2.5-pro-preview-05-06"
+_DEFAULT_COUNCIL_MODEL = "gemini-3.1-pro-preview"
 _DEFAULT_GPT_MODEL = "gpt-4o"
 
 
