@@ -12,9 +12,12 @@ import sys
 import time
 import argparse
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "Q21G-player-whl"))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "Q21G-referee-whl", "examples"))
+# Player path MUST come first — its gemini_client has model/temperature params
+# that council.py depends on. Referee's gemini_client is a simpler version.
+_proj = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, os.path.join(_proj, "Q21G-referee-whl", "examples"))
+sys.path.insert(0, os.path.join(_proj, "Q21G-player-whl"))
+sys.path.insert(0, _proj)
 
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv(usecwd=True))
