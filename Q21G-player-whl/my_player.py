@@ -80,10 +80,10 @@ class MyPlayerAI(PlayerAI):
 
         self._log("phase2_answers", enriched)
 
-        # ── Step 1: Multi-Perspective HyDE ───────────────────────
+        # ── Step 1: Multi-Perspective HyDE (temp=0.4 for diversity) ─
         mp_prompt = build_mp_hyde_prompt(
             book_name, book_hint, association_word, enriched)
-        mp_result = generate_json(mp_prompt)
+        mp_result = generate_json(mp_prompt, temperature=0.4)
         paragraphs = mp_result.get("paragraphs", [])
         if not paragraphs:
             paragraphs = [f"{book_name} {book_hint}"]

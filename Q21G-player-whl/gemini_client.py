@@ -19,33 +19,21 @@ _client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY", ""))
 _DEFAULT_MODEL = "gemini-3.1-flash-lite-preview"
 
 
-def generate(prompt: str, model: str = None) -> str:
-    """Generate text from a prompt using Gemini.
-
-    Args:
-        prompt: The full prompt to send to Gemini.
-        model: Optional model ID override. Falls back to GEMINI_MODEL env var
-               or the default model.
-
-    Returns:
-        The model's text response.
-    """
+def generate(prompt: str, model: str = None, temperature: float = 0.0) -> str:
+    """Generate text. Default temperature=0 for deterministic output."""
+    from google.genai.types import GenerateContentConfig
     model_id = model or os.getenv("GEMINI_MODEL", _DEFAULT_MODEL)
     response = _client.models.generate_content(
         model=model_id, contents=prompt,
+        config=GenerateContentConfig(temperature=temperature),
     )
     return response.text
 
 
-def generate_json(prompt: str, model: str = None) -> dict:
-    """Generate a JSON response from a prompt.
-
-    Handles markdown code blocks and returns {} on parse failure.
-
-    Args:
-        model: Optional model ID override passed through to generate().
-    """
-    raw = generate(prompt, model=model)
+def generate_json(prompt: str, model: str = None,
+                  temperature: float = 0.0) -> dict:
+    """Generate JSON. Handles code blocks. Returns {} on failure."""
+    raw = generate(prompt, model=model, temperature=temperature)
     return _parse_json(raw)
 
 

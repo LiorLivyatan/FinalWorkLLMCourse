@@ -3,8 +3,7 @@
 """Thin wrapper around OpenAI SDK for text generation.
 
 Uses OPENAI_API_KEY (auto-detected by SDK) and OPENAI_MODEL env var.
-Exposes two functions: generate() for raw text, generate_json() for
-parsed JSON responses with structured output.
+Supports per-call temperature override for deterministic vs creative tasks.
 """
 import json
 import os
@@ -18,21 +17,23 @@ _client = OpenAI()
 _DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o")
 
 
-def generate(prompt: str) -> str:
-    """Generate text from a prompt."""
+def generate(prompt: str, temperature: float = 0.0) -> str:
+    """Generate text. Default temperature=0 for deterministic output."""
     response = _client.chat.completions.create(
         model=_DEFAULT_MODEL,
         messages=[{"role": "user", "content": prompt}],
+        temperature=temperature,
     )
     return response.choices[0].message.content
 
 
-def generate_json(prompt: str) -> dict:
-    """Generate a JSON response from a prompt."""
+def generate_json(prompt: str, temperature: float = 0.0) -> dict:
+    """Generate JSON. Default temperature=0 for deterministic output."""
     response = _client.chat.completions.create(
         model=_DEFAULT_MODEL,
         messages=[{"role": "user", "content": prompt}],
         response_format={"type": "json_object"},
+        temperature=temperature,
     )
     try:
         return json.loads(response.choices[0].message.content)
