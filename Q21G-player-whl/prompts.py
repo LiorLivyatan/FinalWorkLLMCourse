@@ -14,6 +14,7 @@ from prompts_questions import (
     build_questions_prompt,
     build_hyde_prompt,
     build_mp_hyde_prompt,
+    build_keyword_extraction_prompt,
 )
 from prompts_deliberation import (
     format_answer,
@@ -29,6 +30,7 @@ __all__ = [
     "build_questions_prompt",
     "build_hyde_prompt",
     "build_mp_hyde_prompt",
+    "build_keyword_extraction_prompt",
     "format_answer",
     "_format_answer",
     "build_deliberation_prompt",

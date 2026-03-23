@@ -98,3 +98,25 @@ Reply with ONLY valid JSON:
   "Hebrew paragraph 2...",
   "Hebrew paragraph 3..."
 ]}}"""
+
+
+def build_keyword_extraction_prompt(book_hint: str, association_word: str) -> str:
+    """Extract concrete search keywords from the abstract hint.
+
+    The hint is deliberately abstract. This prompt extracts the concrete
+    nouns, numbers, and technical terms that would appear in the actual
+    paragraph — targeting a different embedding-space region than HyDE.
+    """
+    return f"""Extract concrete search keywords from this hint about a
+Hebrew textbook paragraph.
+
+Hint: "{book_hint}"
+Association word: "{association_word}"
+
+Think: what specific nouns, numbers, technical terms, or Hebrew words
+would LITERALLY APPEAR in the target paragraph? Not abstract concepts —
+actual words you'd find in the text.
+
+Reply with ONLY valid JSON:
+{{"hebrew_keywords": "3-5 Hebrew keywords separated by spaces",
+  "english_keywords": "3-5 English keywords separated by spaces"}}"""

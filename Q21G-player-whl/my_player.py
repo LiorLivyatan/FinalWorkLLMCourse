@@ -6,8 +6,8 @@ from openai_client import generate, generate_json
 from knowledge_base import ensure_indexed, search
 from prompts import (
     build_questions_prompt,
-    build_hyde_prompt,
     build_mp_hyde_prompt,
+    build_keyword_extraction_prompt,
     build_guess_prompt,
 )
 from candidate_filter import deterministic_filter, llm_filter
@@ -29,8 +29,12 @@ class MyPlayerAI(PlayerAI):
 
     def __init__(self):
         ensure_indexed()
-        self._last_questions = []  # stored for use in get_guess()
+        self._last_questions = []
         self.logger = None
+
+    def _log(self, phase, data):
+        if self.logger:
+            self.logger.log_phase(phase, data)
 
     def get_warmup_answer(self, ctx: dict) -> dict:
         question = ctx["dynamic"]["warmup_question"]
@@ -52,11 +56,9 @@ class MyPlayerAI(PlayerAI):
         questions = result.get("questions", [])
         if len(questions) != 20:
             questions = fallback_questions(book_name)
-        self._last_questions = questions  # store for get_guess()
-
+        self._last_questions = questions
         self.logger = PhaseLogger(book_name)
-        self.logger.log_phase("phase1_questions", questions)
-
+        self._log("phase1_questions", questions)
         return {"questions": questions}
 
     def get_guess(self, ctx: dict) -> dict:
@@ -76,28 +78,34 @@ class MyPlayerAI(PlayerAI):
                 "options": q.get("options", {}),
             })
 
-        if self.logger:
-            self.logger.log_phase("phase2_answers", enriched)
+        self._log("phase2_answers", enriched)
 
         # ── Step 1: Multi-Perspective HyDE ───────────────────────
         mp_prompt = build_mp_hyde_prompt(
-            book_name, book_hint, association_word, enriched,
-        )
+            book_name, book_hint, association_word, enriched)
         mp_result = generate_json(mp_prompt)
         paragraphs = mp_result.get("paragraphs", [])
         if not paragraphs:
             paragraphs = [f"{book_name} {book_hint}"]
+        self._log("phase3_queries", paragraphs)
 
-        if self.logger:
-            self.logger.log_phase("phase3_queries", paragraphs)
-
-        # ── Step 2: RAG — search with HyDE + original + hint ────
+        # ── Step 2: Stratified RAG search ─────────────────────────
+        # Probe A: HyDE semantic (3 correlated queries)
         all_results = []
         for p in paragraphs:
             all_results.extend(search(p, n_results=5))
+        # Probe B: keyword extraction (independent, lexical region)
+        kw_prompt = build_keyword_extraction_prompt(book_hint, association_word)
+        kw = generate_json(kw_prompt)
+        heb_kw = kw.get("hebrew_keywords", "")
+        eng_kw = kw.get("english_keywords", "")
+        if heb_kw:
+            all_results.extend(search(heb_kw, n_results=5))
+        if eng_kw:
+            all_results.extend(search(eng_kw, n_results=3))
+        # Probe C: association word lateral search
         all_results.extend(search(
-            f"{book_name} {book_hint} {association_word}", n_results=5))
-        all_results.extend(search(book_hint, n_results=3))
+            f"{association_word} {book_name}", n_results=3))
 
         # Deduplicate and merge
         seen = set()
@@ -109,37 +117,26 @@ class MyPlayerAI(PlayerAI):
                 candidates.append(c)
 
         top_candidates = candidates[:10]
-        if self.logger:
-            self.logger.log_phase("phase4_candidates",
-                [{"content": c["content"][:150] + "..."} for c in top_candidates])
+        self._log("phase4_candidates",
+                  [{"content": c["content"][:150]} for c in top_candidates])
 
         # ── Step 3: Hybrid Filter ─────────────────────────────────
         filtered = deterministic_filter(top_candidates, enriched)
         filtered = llm_filter(filtered, enriched)
-
-        if self.logger:
-            self.logger.log_phase("phase5_filter", [
-                {"content": c["content"][:150] + "..."} for c in filtered
-            ])
+        self._log("phase5_filter",
+                  [{"content": c["content"][:150]} for c in filtered])
 
         # ── Step 4: Two-Model Council ─────────────────────────────
         council_result = council_deliberate(filtered, enriched)
-
-        if self.logger:
-            self.logger.log_phase("phase6_council", council_result)
-
+        self._log("phase6_council", council_result)
         best_text = council_result.get("best_paragraph_text", "")
 
-        # ── Step 5: Final guess from best candidate ───────────────
+        # ── Step 5: Final guess ───────────────────────────────────
         prompt = build_guess_prompt(
-            book_name, book_hint, association_word, answers, best_text,
-        )
+            book_name, book_hint, association_word, answers, best_text)
         result = generate_json(prompt)
         validated = validate_guess(result)
-
-        if self.logger:
-            self.logger.log_phase("final_guess", validated)
-
+        self._log("final_guess", validated)
         return validated
 
     def on_score_received(self, ctx: dict) -> None:
