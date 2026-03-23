@@ -43,7 +43,13 @@ Rules:
 2. book_hint: up to 15 words, NO WORDS from the paragraph (this is critical)
 3. association_word: the CATEGORY shown to players (e.g., "memory", "limits")
 4. actual_association_word: the SECRET specific concept players must guess
-5. opening_sentence: the EXACT verbatim first sentence from the paragraph
+5. opening_sentence: the FIRST REAL CONTENT SENTENCE from the paragraph.
+   SKIP these — they are NOT sentences:
+   - Section/chapter numbers (e.g., "3.8", "8.7סיכום")
+   - Copyright notices ("כל הזכויות שמורות")
+   - Page numbers, headers, footers, titles
+   - Author names ("Dr. Segal Yoram")
+   Copy the actual first sentence of CONTENT, verbatim in Hebrew.
 6. warmup_question: a simple math problem (e.g., "What is 8 * 7?")
 
 Reply with ONLY valid JSON."""
@@ -64,15 +70,6 @@ def validate_hint(hint: str, paragraph: str) -> bool:
     return True
 
 
-def _extract_opening_sentence(text: str) -> str:
-    """Return the first sentence from a chunk of text."""
-    for sep in (".", "!", "?", "\n"):
-        idx = text.find(sep)
-        if idx != -1:
-            return text[: idx + 1].strip()
-    return text.strip()
-
-
 def _get_collection() -> chromadb.Collection:
     client = chromadb.PersistentClient(path=_DB_PATH)
     return client.get_collection("course_material")
@@ -88,18 +85,21 @@ def _fetch_random_chunk(col: chromadb.Collection) -> dict:
     }
 
 
+_MODEL = None  # set by main() from CLI args
+
+
 def _generate_metadata(chunk_text: str) -> dict:
     prompt = _REFEREE_PROMPT.format(chunk_text=chunk_text)
-    return generate_json(prompt, temperature=0.0)
+    kwargs = {"temperature": 0.0}
+    if _MODEL:
+        kwargs["model"] = _MODEL
+    return generate_json(prompt, **kwargs)
 
 
 def generate_scenario(col: chromadb.Collection, scenario_id: int) -> dict | None:
     """Generate one scenario with up to _MAX_RETRIES attempts on validation failure."""
     chunk = _fetch_random_chunk(col)
-    text = chunk["text"]
-    meta = chunk["metadata"]
-    opening = _extract_opening_sentence(text)
-
+    text, meta = chunk["text"], chunk["metadata"]
     for attempt in range(_MAX_RETRIES):
         raw = _generate_metadata(text)
         if not raw:
@@ -115,7 +115,7 @@ def generate_scenario(col: chromadb.Collection, scenario_id: int) -> dict | None
             "book_hint": hint,
             "association_word": raw.get("association_word", ""),
             "actual_association_word": raw.get("actual_association_word", ""),
-            "opening_sentence": raw.get("opening_sentence", opening),
+            "opening_sentence": raw.get("opening_sentence", ""),
             "full_paragraph": text,
             "warmup_question": raw.get("warmup_question", "What is 7 * 7?"),
         }
@@ -123,6 +123,10 @@ def generate_scenario(col: chromadb.Collection, scenario_id: int) -> dict | None
 
 
 def main() -> None:
+    global _MODEL
+    if "--model" in sys.argv:
+        _MODEL = sys.argv[sys.argv.index("--model") + 1]
+        print(f"Using model: {_MODEL}")
     col = _get_collection()
     print(f"Connected to ChromaDB — {col.count()} documents")
     scenarios = []
