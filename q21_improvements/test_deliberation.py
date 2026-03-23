@@ -22,10 +22,10 @@ def test_gemini_generate_accepts_model_param():
     sig = inspect.signature(generate)
     assert "model" in sig.parameters
 
-def test_filter_keeps_candidate_with_numbers():
+def test_filter_ranks_matching_candidate_first():
+    """Candidate with numbers should be ranked first (highest score)."""
     result = deterministic_filter(
-        [CANDIDATE_WITH_NUMBERS, CANDIDATE_NO_NUMBERS], ENRICHED_NUMBERS)
-    assert len(result) == 1
+        [CANDIDATE_NO_NUMBERS, CANDIDATE_WITH_NUMBERS], ENRICHED_NUMBERS)
     assert result[0] == CANDIDATE_WITH_NUMBERS
 
 def test_filter_skips_when_answer_is_d():

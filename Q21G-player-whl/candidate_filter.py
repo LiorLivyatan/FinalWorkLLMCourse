@@ -50,16 +50,30 @@ _KEYWORD_CHECKS = {
 # Public API — deterministic filter
 # ---------------------------------------------------------------------------
 
-def deterministic_filter(candidates: list, enriched_questions: list) -> list:
-    """Remove candidates that violate hard constraints from enriched_questions.
+MIN_SURVIVORS = 3  # council needs choices — never filter below this
 
-    Never returns empty — falls back to the full input list.
+
+def deterministic_filter(candidates: list, enriched_questions: list) -> list:
+    """Remove candidates that violate hard constraints.
+
+    Guarantees at least MIN_SURVIVORS so the council has real choices.
+    If fewer pass all checks, keeps the top-scoring candidates by
+    number of checks passed.
     """
     checks = _build_checks(enriched_questions)
     if not checks:
         return candidates
-    filtered = [c for c in candidates if _passes_all(c['content'], checks)]
-    return filtered if filtered else candidates
+
+    # Score each candidate by checks passed
+    scored = [(sum(1 for fn in checks if fn(c["content"])), c)
+              for c in candidates]
+    scored.sort(key=lambda x: x[0], reverse=True)
+
+    all_pass = [c for n, c in scored if n == len(checks)]
+    if len(all_pass) >= MIN_SURVIVORS:
+        return all_pass
+    # Not enough strict survivors — keep top N by score
+    return [c for _, c in scored[:max(MIN_SURVIVORS, len(all_pass))]]
 
 # ---------------------------------------------------------------------------
 # Internal helpers

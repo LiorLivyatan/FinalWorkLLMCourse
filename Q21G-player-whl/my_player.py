@@ -91,19 +91,18 @@ class MyPlayerAI(PlayerAI):
         if self.logger:
             self.logger.log_phase("phase3_queries", paragraphs)
 
-        # ── Step 2: RAG — search with all paragraphs ──────────────
-        candidates_hyde = []
+        # ── Step 2: RAG — search with HyDE + original + hint ────
+        all_results = []
         for p in paragraphs:
-            candidates_hyde.extend(search(p, n_results=5))
-
-        candidates_orig = search(
-            f"{book_name} {book_hint} {association_word}", n_results=3,
-        )
+            all_results.extend(search(p, n_results=5))
+        all_results.extend(search(
+            f"{book_name} {book_hint} {association_word}", n_results=5))
+        all_results.extend(search(book_hint, n_results=3))
 
         # Deduplicate and merge
         seen = set()
         candidates = []
-        for c in candidates_hyde + candidates_orig:
+        for c in all_results:
             key = c["content"][:100]
             if key not in seen:
                 seen.add(key)
