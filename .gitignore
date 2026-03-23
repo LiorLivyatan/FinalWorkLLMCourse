@@ -24,6 +24,9 @@ q21-eval-pipeline-workspace/
 q21_improvements/debug_logs/
 q21_improvements/eval_results.json
 
+# Tournament simulation output
+q21_improvements/tournament_sim/
+
 # Tournament-sensitive — ground truth scenarios & results
 q21_improvements/scenarios.py
 q21_improvements/baseline_results.txt
