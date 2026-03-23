@@ -25,20 +25,21 @@ from book_config import (
 class MyRefereeAI(RefereeAI):
     """Referee AI using Gemini + Agno RAG. Paragraph: MCP book section 4.3."""
 
-    def __init__(self) -> None:
-        self._opening_sentence = OPENING_SENTENCE
-        self._actual_word = ACTUAL_ASSOCIATION_WORD
+    def __init__(self, scenario: dict = None) -> None:
+        self._opening_sentence = scenario["opening_sentence"] if scenario else OPENING_SENTENCE
+        self._actual_word = scenario["actual_association_word"] if scenario else ACTUAL_ASSOCIATION_WORD
+        self._book_name = scenario.get("book_name", BOOK_NAME) if scenario else BOOK_NAME
+        self._book_hint = scenario.get("book_hint", BOOK_HINT) if scenario else BOOK_HINT
+        self._association_word = scenario.get("association_word", ASSOCIATION_WORD) if scenario else ASSOCIATION_WORD
         knowledge_base.ensure_indexed()
 
     def get_warmup_question(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
-        dynamic = ctx.get("dynamic", ctx)  # noqa: F841
         return {"warmup_question":
                 "How many items can the average human hold in short-term memory?"}
 
     def get_round_start_info(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
-        dynamic = ctx.get("dynamic", ctx)  # noqa: F841
-        return {"book_name": BOOK_NAME, "book_hint": BOOK_HINT,
-                "association_word": ASSOCIATION_WORD}
+        return {"book_name": self._book_name, "book_hint": self._book_hint,
+                "association_word": self._association_word}
 
     def get_answers(self, ctx: Dict[str, Any]) -> Dict[str, Any]:
         dynamic = ctx.get("dynamic", ctx)

@@ -49,20 +49,23 @@ def get_knowledge() -> Knowledge:
 def ensure_indexed() -> None:
     """Index MCP book chapters into ChromaDB if not already done.
 
+    Checks the .indexed flag file first — if present, the pre-built
+    database is available and no course material path is needed.
+
     Raises:
-        FileNotFoundError: If COURSE_MATERIAL_PATH doesn't exist.
+        FileNotFoundError: If COURSE_MATERIAL_PATH doesn't exist and indexing is needed.
     """
+    chroma_path = os.getenv("CHROMA_PATH", "../database")
+    flag_file = Path(chroma_path) / ".indexed"
+    if flag_file.exists():
+        return
+
     course_path = os.getenv("COURSE_MATERIAL_PATH", "../chapters_en")
     material_dir = Path(course_path)
     if not material_dir.exists():
         raise FileNotFoundError(
             f"Course material not found at: {material_dir.resolve()}"
         )
-
-    chroma_path = os.getenv("CHROMA_PATH", "../database")
-    flag_file = Path(chroma_path) / ".indexed"
-    if flag_file.exists():
-        return
 
     kb = get_knowledge()
     kb.insert(path=str(material_dir))
